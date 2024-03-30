@@ -29,3 +29,5 @@ jobs:
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+          echo "# Format commit SHA:" >> .git-blame-ignore-revs
+          echo git rev-parse HEAD >> .git-blame-ignore-revs
