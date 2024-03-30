@@ -1,7 +1,7 @@
 name: format-pr
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '*/15 * * * *'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,5 +31,7 @@ jobs:
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
           echo "# Format commit SHA:" >> .git-blame-ignore-revs
           echo git rev-parse HEAD >> .git-blame-ignore-revs
+          git config --local user.name lbonaldo
+          git config --local user.email "bonaldo.luca12@gmail.com"
           git add .git-blame-ignore-revs; git commit -m "Add commmit to .git-blame-ignore-revs"
           git push origin auto-juliaformatter-pr
