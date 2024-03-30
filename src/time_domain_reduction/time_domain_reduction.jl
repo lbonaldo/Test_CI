@@ -890,9 +890,8 @@ function cluster_inputs(
     end
 
     # Put it together!
-    InputData = DataFrame(
-        Dict(all_col_names[c] => all_profiles[c] for c = 1:length(all_col_names)),
-    )
+    InputData =
+        DataFrame(Dict(all_col_names[c] => all_profiles[c] for c = 1:length(all_col_names)))
     InputData = convert.(Float64, InputData)
     if v
         println("Demand (MW) and Capacity Factor Profiles: ")
