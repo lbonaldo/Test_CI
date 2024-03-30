@@ -31,3 +31,5 @@ jobs:
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
           echo "# Format commit SHA:" >> .git-blame-ignore-revs
           echo git rev-parse HEAD >> .git-blame-ignore-revs
+          git add .git-blame-ignore-revs; git commit -m "Add commmit to .git-blame-ignore-revs"
+          git push origin auto-juliaformatter-pr
