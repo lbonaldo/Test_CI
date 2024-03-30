@@ -114,7 +114,7 @@ function write_testlog(
     # Save the results to a log file
     # Format: datetime, message, test result
 
-    Log_path = joinpath(@__DIR__,"Logs")
+    Log_path = joinpath(@__DIR__, "Logs")
     if !isdir(Log_path)
         mkdir(Log_path)
     end
@@ -227,13 +227,16 @@ Compare two columns of a DataFrame. Return true if they are identical or approxi
 function isapprox_col(col1, col2)
     if isequal(col1, col2) || (eltype(col1) <: Float64 && isapprox(col1, col2))
         return true
-    elseif eltype(col1) <: AbstractString 
+    elseif eltype(col1) <: AbstractString
         isapprox_col = true
         for i in eachindex(col1)
-            if !isapprox_col 
+            if !isapprox_col
                 break
-            elseif !isnothing(tryparse(Float64, col1[i])) && !isnothing(tryparse(Float64, col2[i]))
-                isapprox_col = isapprox_col && isapprox(parse(Float64, col1[i]), parse(Float64, col2[i]))
+            elseif !isnothing(tryparse(Float64, col1[i])) &&
+                   !isnothing(tryparse(Float64, col2[i]))
+                isapprox_col =
+                    isapprox_col &&
+                    isapprox(parse(Float64, col1[i]), parse(Float64, col2[i]))
             else
                 isapprox_col = isapprox_col && isequal(col1[i], col2[i])
             end

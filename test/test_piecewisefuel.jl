@@ -7,11 +7,7 @@ obj_true = 2341.82308
 test_path = "piecewise_fuel"
 
 # Define test inputs
-genx_setup = Dict(
-    "UCommit" => 2,
-    "CO2Cap" => 1,
-    "ParameterScale" => 1,
-)
+genx_setup = Dict("UCommit" => 2, "CO2Cap" => 1, "ParameterScale" => 1)
 
 # Run the case and get the objective value and tolerance
 EP, _, _ = redirect_stdout(devnull) do

@@ -11,8 +11,8 @@ For example, if p = 10,
 1 hour before t=11 is t=20
 """
 function hoursbefore(p::Int, t::Int, b::Int)::Int
-	period = div(t - 1, p)
-	return period * p + mod1(t - b, p)
+    period = div(t - 1, p)
+    return period * p + mod1(t - b, p)
 end
 
 @doc raw"""
@@ -23,8 +23,8 @@ to allow for example b=1:3 to fetch a Vector{Int} of the three hours before
 time index t.
 """
 function hoursbefore(p::Int, t::Int, b::UnitRange{Int})::Vector{Int}
-	period = div(t - 1, p)
-	return period * p .+ mod1.(t .- b, p)
+    period = div(t - 1, p)
+    return period * p .+ mod1.(t .- b, p)
 end
 
 
@@ -64,7 +64,7 @@ end
 This function checks if a column in a dataframe is all zeros.
 """
 function is_nonzero(df::DataFrame, col::Symbol)::BitVector
-	convert(BitVector, df[!, col] .> 0)::BitVector
+    convert(BitVector, df[!, col] .> 0)::BitVector
 end
 
 function is_nonzero(rs::Vector{<:AbstractResource}, col::Symbol)
@@ -82,4 +82,3 @@ function by_rid_res(rid::Integer, sym::Symbol, rs::Vector{<:AbstractResource})
     f = isdefined(GenX, sym) ? getfield(GenX, sym) : x -> getproperty(x, sym)
     return f(r)
 end
-
