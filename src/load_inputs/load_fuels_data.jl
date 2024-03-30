@@ -9,7 +9,7 @@ function load_fuels_data!(setup::Dict, path::AbstractString, inputs::Dict)
     TDR_directory = joinpath(path, setup["TimeDomainReductionFolder"])
     # if TDR is used, my_dir = TDR_directory, else my_dir = "system"
     my_dir = get_systemfiles_path(setup, TDR_directory, path)
-    
+
     filename = "Fuels_data.csv"
     fuels_in = load_dataframe(joinpath(my_dir, filename))
 
@@ -21,16 +21,16 @@ function load_fuels_data!(setup::Dict, path::AbstractString, inputs::Dict)
     fuels = names(fuels_in)[2:end]
     costs = Matrix(fuels_in[2:end, 2:end])
     CO2_content = fuels_in[1, 2:end] # tons CO2/MMBtu
-    fuel_costs = Dict{AbstractString, Array{Float64}}()
-    fuel_CO2 = Dict{AbstractString, Float64}()
+    fuel_costs = Dict{AbstractString,Array{Float64}}()
+    fuel_CO2 = Dict{AbstractString,Float64}()
 
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
 
     for i = 1:length(fuels)
-            # fuel cost is in $/MMBTU w/o scaling, $/Billon BTU w/ scaling
-            fuel_costs[fuels[i]] = costs[:,i] / scale_factor
-            # No need to scale fuel_CO2, fuel_CO2 is ton/MMBTU or kton/Billion BTU 
-            fuel_CO2[fuels[i]] = CO2_content[i] 
+        # fuel cost is in $/MMBTU w/o scaling, $/Billon BTU w/ scaling
+        fuel_costs[fuels[i]] = costs[:, i] / scale_factor
+        # No need to scale fuel_CO2, fuel_CO2 is ton/MMBTU or kton/Billion BTU 
+        fuel_CO2[fuels[i]] = CO2_content[i]
     end
 
     inputs["fuels"] = fuels

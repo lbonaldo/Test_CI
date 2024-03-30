@@ -28,7 +28,7 @@ run_genx_case!("path/to/case", HiGHS.Optimizer)
 run_genx_case!("path/to/case", Gurobi.Optimizer)
 ```
 """
-function run_genx_case!(case::AbstractString, optimizer::Any=HiGHS.Optimizer)
+function run_genx_case!(case::AbstractString, optimizer::Any = HiGHS.Optimizer)
     genx_settings = get_settings_path(case, "genx_settings.yml") # Settings YAML file path
     writeoutput_settings = get_settings_path(case, "output_settings.yml") # Write-output settings YAML file path
     mysetup = configure_settings(genx_settings, writeoutput_settings) # mysetup dictionary stores settings and GenX-specific parameters
@@ -86,7 +86,8 @@ function run_genx_case_simple!(case::AbstractString, mysetup::Dict, optimizer::A
     if has_values(EP)
         println("Writing Output")
         outputs_path = get_default_output_folder(case)
-        elapsed_time = @elapsed outputs_path = write_outputs(EP, outputs_path, mysetup, myinputs)
+        elapsed_time =
+            @elapsed outputs_path = write_outputs(EP, outputs_path, mysetup, myinputs)
         println("Time elapsed for writing is")
         println(elapsed_time)
         if mysetup["ModelingToGenerateAlternatives"] == 1
@@ -111,15 +112,16 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
     if mysetup["TimeDomainReduction"] == 1
         tdr_settings = get_settings_path(case, "time_domain_reduction_settings.yml") # Multi stage settings YAML file path
         TDRSettingsDict = YAML.load(open(tdr_settings))
-    
+
         first_stage_path = joinpath(case, "inputs", "inputs_p1")
         TDRpath = joinpath(first_stage_path, mysetup["TimeDomainReductionFolder"])
         system_path = joinpath(first_stage_path, mysetup["SystemFolder"])
         prevent_doubled_timedomainreduction(system_path)
         if !time_domain_reduced_files_exist(TDRpath)
-            if (mysetup["MultiStage"] == 1) && (TDRSettingsDict["MultiStageConcatenate"] == 0)
+            if (mysetup["MultiStage"] == 1) &&
+               (TDRSettingsDict["MultiStageConcatenate"] == 0)
                 println("Clustering Time Series Data (Individually)...")
-                for stage_id in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+                for stage_id = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
                     cluster_inputs(case, settings_path, mysetup, stage_id)
                 end
             else
@@ -135,21 +137,25 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
     println("Configuring Solver")
     OPTIMIZER = configure_solver(settings_path, optimizer)
 
-    model_dict=Dict()
-    inputs_dict=Dict()
+    model_dict = Dict()
+    inputs_dict = Dict()
 
-    for t in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+    for t = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
 
         # Step 0) Set Model Year
         mysetup["MultiStageSettingsDict"]["CurStage"] = t
 
         # Step 1) Load Inputs
-        inpath_sub = joinpath(case, "inputs", string("inputs_p",t))
+        inpath_sub = joinpath(case, "inputs", string("inputs_p", t))
 
         inputs_dict[t] = load_inputs(mysetup, inpath_sub)
-        inputs_dict[t] = configure_multi_stage_inputs(inputs_dict[t],mysetup["MultiStageSettingsDict"],mysetup["NetworkExpansion"])
+        inputs_dict[t] = configure_multi_stage_inputs(
+            inputs_dict[t],
+            mysetup["MultiStageSettingsDict"],
+            mysetup["NetworkExpansion"],
+        )
 
-        compute_cumulative_min_retirements!(inputs_dict,t)
+        compute_cumulative_min_retirements!(inputs_dict, t)
         # Step 2) Generate model
         model_dict[t] = generate_model(mysetup, inputs_dict[t], OPTIMIZER)
     end
@@ -178,7 +184,7 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
         mkdir(outpath)
     end
 
-    for p in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+    for p = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
         outpath_cur = joinpath(outpath, "results_p$p")
         write_outputs(model_dict[p], outpath_cur, mysetup, inputs_dict[p])
     end
@@ -187,4 +193,3 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
 
     write_multi_stage_outputs(mystats_d, outpath, mysetup, inputs_dict)
 end
-

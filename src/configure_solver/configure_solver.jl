@@ -32,7 +32,7 @@ function configure_solver(solver_settings_path::String, optimizer::Any)
         "cbc" => configure_cbc,
         "scip" => configure_scip,
     )
-    
+
     return configure_functions[solver_name](path, optimizer)
 end
 
@@ -50,7 +50,8 @@ function rename_keys(attributes::Dict, new_key_names::Dict)
         else
             new_key = new_key_names[old_key]
             if haskey(attributes, new_key)
-                @error "Colliding keys: '$old_key' needs to be renamed to '$new_key' but '$new_key' already exists in", attributes
+                @error "Colliding keys: '$old_key' needs to be renamed to '$new_key' but '$new_key' already exists in",
+                attributes
             end
         end
         updated_attributes[new_key] = value

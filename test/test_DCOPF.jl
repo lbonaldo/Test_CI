@@ -8,11 +8,7 @@ obj_true = 395.171391
 test_path = "DCOPF"
 
 # Define test inputs
-genx_setup = Dict(
-    "Trans_Loss_Segments" => 0,
-    "StorageLosses" => 0,
-    "DC_OPF" => 1,
-)
+genx_setup = Dict("Trans_Loss_Segments" => 0, "StorageLosses" => 0, "DC_OPF" => 1)
 
 # Run the case and get the objective value and tolerance
 EP, _, _ = redirect_stdout(devnull) do

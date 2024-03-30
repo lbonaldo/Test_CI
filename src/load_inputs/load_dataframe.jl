@@ -64,7 +64,11 @@ function load_dataframe(dir::AbstractString, basenames::Vector{String})::DataFra
         target = look_for_file_with_alternate_case(dir, base)
         # admonish
         if target != FILENOTFOUND
-            Base.depwarn("""The filename '$target' is deprecated. '$best_basename' is preferred.""", :load_dataframe, force=true)
+            Base.depwarn(
+                """The filename '$target' is deprecated. '$best_basename' is preferred.""",
+                :load_dataframe,
+                force = true,
+            )
             return load_dataframe_from_file(joinpath(dir, target))
         end
     end
@@ -88,8 +92,10 @@ function look_for_file_with_alternate_case(dir, base)::String
     mapping = Dict(zip(lower_files, files_in_dir))
 
     if length(mapping) != length(files_in_dir)
-        error("""Files in the directory may have names which differ only by upper/lowercase.
-              This must be corrected.""")
+        error(
+            """Files in the directory may have names which differ only by upper/lowercase.
+            This must be corrected.""",
+        )
     end
 
     FILENOTFOUND = filenotfoundconstant()
@@ -107,7 +113,7 @@ end
 
 function keep_duplicated_entries!(s, uniques)
     for u in uniques
-        deleteat!(s, first(findall(x->x==u, s)))
+        deleteat!(s, first(findall(x -> x == u, s)))
     end
     return s
 end
@@ -126,12 +132,14 @@ end
 
 function load_dataframe_from_file(path)::DataFrame
     check_for_duplicate_keys(path)
-    CSV.read(path, DataFrame, header=1)
+    CSV.read(path, DataFrame, header = 1)
 end
 
-function find_matrix_columns_in_dataframe(df::DataFrame,
-        columnprefix::AbstractString;
-        prefixseparator='_')::Vector{Int}
+function find_matrix_columns_in_dataframe(
+    df::DataFrame,
+    columnprefix::AbstractString;
+    prefixseparator = '_',
+)::Vector{Int}
     all_columns = names(df)
 
     # 2 is the length of the '_' connector plus one for indexing
@@ -140,9 +148,9 @@ function find_matrix_columns_in_dataframe(df::DataFrame,
     # if prefix is "ESR", the column name should be like "ESR_1"
     function is_of_this_column_type(c)
         startswith(c, columnprefix) &&
-        length(c) >= length(columnprefix) + 2 &&
-        c[length(columnprefix) + 1] == prefixseparator &&
-        !isnothing(get_integer_part(c))
+            length(c) >= length(columnprefix) + 2 &&
+            c[length(columnprefix)+1] == prefixseparator &&
+            !isnothing(get_integer_part(c))
     end
 
     columns = filter(is_of_this_column_type, all_columns)
@@ -164,11 +172,17 @@ ESR_1, other_thing, ESR_3, ESR_2,
   0.4,           2,   0.6,   0.5,
 ```
 """
-function extract_matrix_from_dataframe(df::DataFrame, columnprefix::AbstractString; prefixseparator='_')
+function extract_matrix_from_dataframe(
+    df::DataFrame,
+    columnprefix::AbstractString;
+    prefixseparator = '_',
+)
     all_columns = names(df)
-    columnnumbers = find_matrix_columns_in_dataframe(df,
-                                                     columnprefix,
-                                                     prefixseparator=prefixseparator)
+    columnnumbers = find_matrix_columns_in_dataframe(
+        df,
+        columnprefix,
+        prefixseparator = prefixseparator,
+    )
 
     if length(columnnumbers) == 0
         msg = """an input dataframe with columns $all_columns was searched for
@@ -188,10 +202,15 @@ function extract_matrix_from_dataframe(df::DataFrame, columnprefix::AbstractStri
     Matrix(dropmissing(df[:, sorted_columns]))
 end
 
-function extract_matrix_from_resources(rs::Vector{T}, columnprefix::AbstractString, default=0.0) where T<:AbstractResource
+function extract_matrix_from_resources(
+    rs::Vector{T},
+    columnprefix::AbstractString,
+    default = 0.0,
+) where {T<:AbstractResource}
 
     # attributes starting with columnprefix with a numeric suffix
-    attributes_n = [attr for attr in string.(attributes(rs[1])) if startswith(attr, columnprefix)]
+    attributes_n =
+        [attr for attr in string.(attributes(rs[1])) if startswith(attr, columnprefix)]
     # sort the attributes by the numeric suffix
     sort!(attributes_n, by = x -> parse(Int, split(x, "_")[end]))
 
@@ -216,7 +235,7 @@ Check that the dataframe has all the required columns.
 - `df_name::AbstractString`: the name of the dataframe, for error messages
 - `required_cols::Vector{AbstractString}`: the names of the required columns
 """
-function validate_df_cols(df::DataFrame, df_name::AbstractString, required_cols) 
+function validate_df_cols(df::DataFrame, df_name::AbstractString, required_cols)
     for col in required_cols
         if col ∉ names(df)
             error("$df_name data file is missing column $col")

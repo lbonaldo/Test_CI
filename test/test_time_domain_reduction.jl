@@ -17,7 +17,7 @@ TDR_Results_test = joinpath(test_folder, "TDR_results_test")
 # Folder with true clustering results for LTS and non-LTS versions
 TDR_Results_true = if VERSION == v"1.6.7"
     joinpath(test_folder, "TDR_results_true_LTS")
-else 
+else
     joinpath(test_folder, "TDR_results_true")
 end
 
@@ -43,10 +43,11 @@ merge!(settings, genx_setup)
 
 clustering_test = with_logger(ConsoleLogger(stderr, Logging.Warn)) do
     GenX.cluster_inputs(test_folder, settings_path, settings, random = false)["ClusterObject"]
-end 
+end
 
 # Load true clustering
-clustering_true = JLD2.load(joinpath(TDR_Results_true, "clusters_true.jld2"))["ClusterObject"]
+clustering_true =
+    JLD2.load(joinpath(TDR_Results_true, "clusters_true.jld2"))["ClusterObject"]
 
 # Clustering validation
 R = Clustering.randindex(clustering_test, clustering_true)

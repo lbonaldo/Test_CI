@@ -40,15 +40,21 @@ function thermal_plant_effective_capacity(
 )::Vector{Float64}
     y = r_id
     gen = inputs["RESOURCES"]
-    capresfactor = derating_factor(gen[y], tag=capres_zone)
+    capresfactor = derating_factor(gen[y], tag = capres_zone)
     eTotalCap = value.(EP[:eTotalCap][y])
 
     effective_capacity = fill(capresfactor * eTotalCap, length(timesteps))
 
     if has_maintenance(inputs) && y in ids_with_maintenance(gen)
-		adjustment = thermal_maintenance_capacity_reserve_margin_adjustment(EP, inputs, y, capres_zone, timesteps)
-		effective_capacity = effective_capacity .+ value.(adjustment)
-	end
+        adjustment = thermal_maintenance_capacity_reserve_margin_adjustment(
+            EP,
+            inputs,
+            y,
+            capres_zone,
+            timesteps,
+        )
+        effective_capacity = effective_capacity .+ value.(adjustment)
+    end
 
     return effective_capacity
 end

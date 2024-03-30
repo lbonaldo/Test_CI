@@ -11,7 +11,7 @@ function test_examples()
     base_path = Base.dirname(Base.dirname(pathof(GenX)))
     examples_path = joinpath(base_path, "example_systems")
 
-    examples_dir = readdir(examples_path, join=true)
+    examples_dir = readdir(examples_path, join = true)
     for example_dir in examples_dir
         if isdir(example_dir) && isfile(joinpath(example_dir, "Run.jl"))
             @info "Running example in $example_dir"
