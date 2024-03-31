@@ -93,9 +93,7 @@ pages = OrderedDict(
         "Method of Morris" => "Model_Reference/methodofmorris.md",
         "Utility Functions" => "Model_Reference/utility_functions.md",
     ],
-    "Public API Reference" => [
-        "Public API" => "Public_API/public_api.md",
-    ],
+    "Public API Reference" => ["Public API" => "Public_API/public_api.md"],
     "Third Party Extensions" => "additional_third_party_extensions.md",
     "Developer Docs" => "developer_guide.md",
 )
