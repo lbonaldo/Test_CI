@@ -1,20 +1,24 @@
-name: format-pr
+name: Format check
 on:
   schedule:
     - cron: '*/15 * * * *'
+
 jobs:
-  build:
+  formatter:
+    strategy:
+      matrix:
+        branch: ["main", "develop"]
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
       - uses: julia-actions/cache@v1
       - name: Install JuliaFormatter and format
         run: |
           julia  -e 'import Pkg; Pkg.add("JuliaFormatter")'
           julia  -e 'using JuliaFormatter; format(".")'
-
-      # https://github.com/marketplace/actions/create-pull-request
-      # https://github.com/peter-evans/create-pull-request#reference-example
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v3
