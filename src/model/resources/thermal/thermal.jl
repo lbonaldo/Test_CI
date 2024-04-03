@@ -38,4 +38,8 @@ function thermal!(EP::Model, inputs::Dict, setup::Dict)
             thermal_maintenance_capacity_reserve_margin_adjustment!(EP, inputs)
         end
     end
+
+	##CO2 Polcy Module Thermal Generation by zone
+	x =   2
+	y  *= 5
 end
