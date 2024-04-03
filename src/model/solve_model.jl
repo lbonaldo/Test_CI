@@ -56,7 +56,6 @@ function solve_model(EP::Model, setup::Dict)
     optimize!(EP)
 
     if has_values(EP)
-
         if has_duals(EP) # fully linear model
             println("LP solved for primal")
         else
@@ -66,11 +65,9 @@ function solve_model(EP::Model, setup::Dict)
         ## Record solver time
         solver_time = time() - solver_start_time
     elseif setup["ComputeConflicts"] == 0
-
         @info "No model solution. You can try to set ComputeConflicts to 1 in the genx_settings.yml file to compute conflicting constraints."
 
     elseif setup["ComputeConflicts"] == 1
-
         @info "No model solution. Trying to identify conflicting constriants..."
 
         try
@@ -102,7 +99,6 @@ function solve_model(EP::Model, setup::Dict)
             solver_time = time() - solver_start_time
             return EP, solver_time, list_of_conflicting_constraints
         end
-
     end
 
     return EP, solver_time

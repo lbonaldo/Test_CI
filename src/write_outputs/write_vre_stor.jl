@@ -81,8 +81,8 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
 
     j = 1
     for i in VRE_STOR
-        existingcapgrid[j] =
-            MultiStage == 1 ? value(EP[:vEXISTINGCAP][i]) : existing_cap_mw(gen[i])
+        existingcapgrid[j] = MultiStage == 1 ? value(EP[:vEXISTINGCAP][i]) :
+                             existing_cap_mw(gen[i])
         if i in inputs["NEW_CAP"]
             capgrid[j] = value(EP[:vCAP][i])
         end
@@ -91,9 +91,8 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
         end
 
         if i in SOLAR
-            existingcapsolar[j] =
-                MultiStage == 1 ? value(EP[:vEXISTINGSOLARCAP][i]) :
-                existing_cap_solar_mw(gen_VRE_STOR[j])
+            existingcapsolar[j] = MultiStage == 1 ? value(EP[:vEXISTINGSOLARCAP][i]) :
+                                  existing_cap_solar_mw(gen_VRE_STOR[j])
             if i in inputs["NEW_CAP_SOLAR"]
                 capsolar[j] = value(EP[:vSOLARCAP][i])
             end
@@ -103,9 +102,8 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
         end
 
         if i in WIND
-            existingcapwind[j] =
-                MultiStage == 1 ? value(EP[:vEXISTINGWINDCAP][i]) :
-                existing_cap_wind_mw(gen_VRE_STOR[j])
+            existingcapwind[j] = MultiStage == 1 ? value(EP[:vEXISTINGWINDCAP][i]) :
+                                 existing_cap_wind_mw(gen_VRE_STOR[j])
             if i in inputs["NEW_CAP_WIND"]
                 capwind[j] = value(EP[:vWINDCAP][i])
             end
@@ -115,9 +113,8 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
         end
 
         if i in DC
-            existingcapdc[j] =
-                MultiStage == 1 ? value(EP[:vEXISTINGDCCAP][i]) :
-                existing_cap_inverter_mw(gen_VRE_STOR[j])
+            existingcapdc[j] = MultiStage == 1 ? value(EP[:vEXISTINGDCCAP][i]) :
+                               existing_cap_inverter_mw(gen_VRE_STOR[j])
             if i in inputs["NEW_CAP_DC"]
                 capdc[j] = value(EP[:vDCCAP][i])
             end
@@ -127,9 +124,8 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
         end
 
         if i in STOR
-            existingcapenergy[j] =
-                MultiStage == 1 ? value(EP[:vEXISTINGCAPENERGY_VS][i]) :
-                existing_cap_mwh(gen[i])
+            existingcapenergy[j] = MultiStage == 1 ? value(EP[:vEXISTINGCAPENERGY_VS][i]) :
+                                   existing_cap_mwh(gen[i])
             if i in inputs["NEW_CAP_STOR"]
                 capenergy[j] = value(EP[:vCAPENERGY_VS][i])
             end
@@ -144,9 +140,9 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
                 if i in inputs["RET_CAP_CHARGE_DC"]
                     retcapchargedc[j] = value(EP[:vRETCAPCHARGE_DC][i])
                 end
-                existingcapchargedc[j] =
-                    MultiStage == 1 ? value(EP[:vEXISTINGCAPCHARGEDC][i]) :
-                    existing_cap_charge_dc_mw(gen_VRE_STOR[j])
+                existingcapchargedc[j] = MultiStage == 1 ?
+                                         value(EP[:vEXISTINGCAPCHARGEDC][i]) :
+                                         existing_cap_charge_dc_mw(gen_VRE_STOR[j])
             end
             if i in inputs["VS_ASYM_AC_CHARGE"]
                 if i in inputs["NEW_CAP_CHARGE_AC"]
@@ -155,9 +151,9 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
                 if i in inputs["RET_CAP_CHARGE_AC"]
                     retcapchargeac[j] = value(EP[:vRETCAPCHARGE_AC][i])
                 end
-                existingcapchargeac[j] =
-                    MultiStage == 1 ? value(EP[:vEXISTINGCAPCHARGEAC][i]) :
-                    existing_cap_charge_ac_mw(gen_VRE_STOR[j])
+                existingcapchargeac[j] = MultiStage == 1 ?
+                                         value(EP[:vEXISTINGCAPCHARGEAC][i]) :
+                                         existing_cap_charge_ac_mw(gen_VRE_STOR[j])
             end
             if i in inputs["VS_ASYM_DC_DISCHARGE"]
                 if i in inputs["NEW_CAP_DISCHARGE_DC"]
@@ -166,9 +162,9 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
                 if i in inputs["RET_CAP_DISCHARGE_DC"]
                     retcapdischargedc[j] = value(EP[:vRETCAPDISCHARGE_DC][i])
                 end
-                existingcapdischargedc[j] =
-                    MultiStage == 1 ? value(EP[:vEXISTINGCAPDISCHARGEDC][i]) :
-                    existing_cap_discharge_dc_mw(gen_VRE_STOR[j])
+                existingcapdischargedc[j] = MultiStage == 1 ?
+                                            value(EP[:vEXISTINGCAPDISCHARGEDC][i]) :
+                                            existing_cap_discharge_dc_mw(gen_VRE_STOR[j])
             end
             if i in inputs["VS_ASYM_AC_DISCHARGE"]
                 if i in inputs["NEW_CAP_DISCHARGE_AC"]
@@ -177,9 +173,9 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
                 if i in inputs["RET_CAP_DISCHARGE_AC"]
                     retcapdischargeac[j] = value(EP[:vRETCAPDISCHARGE_AC][i])
                 end
-                existingcapdischargeac[j] =
-                    MultiStage == 1 ? value(EP[:vEXISTINGCAPDISCHARGEAC][i]) :
-                    existing_cap_discharge_ac_mw(gen_VRE_STOR[j])
+                existingcapdischargeac[j] = MultiStage == 1 ?
+                                            value(EP[:vEXISTINGCAPDISCHARGEAC][i]) :
+                                            existing_cap_discharge_ac_mw(gen_VRE_STOR[j])
             end
         end
         j += 1
@@ -231,7 +227,7 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
         RetDischargeACCap = retcapdischargeac[:],
         NewDischargeACCap = capdischargeac[:],
         EndDischargeACCap = existingcapdischargeac[:] - retcapdischargeac[:] +
-                            capdischargeac[:],
+                            capdischargeac[:]
     )
 
     if setup["ParameterScale"] == 1
@@ -271,7 +267,7 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
             :StartDischargeACCap,
             :RetDischargeACCap,
             :NewDischargeACCap,
-            :EndDischargeACCap,
+            :EndDischargeACCap
         ]
         dfCap[!, columns_to_scale] .*= ModelScalingFactor
     end
@@ -316,7 +312,7 @@ function write_vre_stor_capacity(path::AbstractString, inputs::Dict, setup::Dict
         StartDischargeACCap = sum(dfCap[!, :StartDischargeACCap]),
         RetDischargeACCap = sum(dfCap[!, :RetDischargeACCap]),
         NewDischargeACCap = sum(dfCap[!, :NewDischargeACCap]),
-        EndDischargeACCap = sum(dfCap[!, :EndDischargeACCap]),
+        EndDischargeACCap = sum(dfCap[!, :EndDischargeACCap])
     )
 
     dfCap = vcat(dfCap, total)
@@ -341,15 +337,13 @@ function write_vre_stor_charge(path::AbstractString, inputs::Dict, setup::Dict, 
         dfCharge_DC = DataFrame(
             Resource = inputs["RESOURCE_NAMES_DC_CHARGE"],
             Zone = inputs["ZONES_DC_CHARGE"],
-            AnnualSum = Array{Union{Missing,Float32}}(undef, size(DC_CHARGE)[1]),
+            AnnualSum = Array{Union{Missing, Float32}}(undef, size(DC_CHARGE)[1])
         )
         charge_dc = zeros(size(DC_CHARGE)[1], T)
-        charge_dc =
-            value.(EP[:vP_DC_CHARGE]).data ./
-            etainverter.(gen_VRE_STOR[(gen_VRE_STOR.stor_dc_discharge.!=0)]) *
-            (setup["ParameterScale"] == 1 ? ModelScalingFactor : 1)
+        charge_dc = value.(EP[:vP_DC_CHARGE]).data ./
+                    etainverter.(gen_VRE_STOR[(gen_VRE_STOR.stor_dc_discharge .!= 0)]) *
+                    (setup["ParameterScale"] == 1 ? ModelScalingFactor : 1)
         dfCharge_DC.AnnualSum .= charge_dc * inputs["omega"]
-
 
         filepath = joinpath(path, "vre_stor_dc_charge.csv")
         if setup["WriteOutputs"] == "annual"
@@ -364,12 +358,11 @@ function write_vre_stor_charge(path::AbstractString, inputs::Dict, setup::Dict, 
         dfCharge_AC = DataFrame(
             Resource = inputs["RESOURCE_NAMES_AC_CHARGE"],
             Zone = inputs["ZONES_AC_CHARGE"],
-            AnnualSum = Array{Union{Missing,Float32}}(undef, size(AC_CHARGE)[1]),
+            AnnualSum = Array{Union{Missing, Float32}}(undef, size(AC_CHARGE)[1])
         )
         charge_ac = zeros(size(AC_CHARGE)[1], T)
-        charge_ac =
-            value.(EP[:vP_AC_CHARGE]).data *
-            (setup["ParameterScale"] == 1 ? ModelScalingFactor : 1)
+        charge_ac = value.(EP[:vP_AC_CHARGE]).data *
+                    (setup["ParameterScale"] == 1 ? ModelScalingFactor : 1)
         dfCharge_AC.AnnualSum .= charge_ac * inputs["omega"]
 
         filepath = joinpath(path, "vre_stor_ac_charge.csv")
@@ -388,10 +381,10 @@ end
 Function for writing the vre-storage discharging decision variables/expressions.
 """
 function write_vre_stor_discharge(
-    path::AbstractString,
-    inputs::Dict,
-    setup::Dict,
-    EP::Model,
+        path::AbstractString,
+        inputs::Dict,
+        setup::Dict,
+        EP::Model
 )
     gen = inputs["RESOURCES"]
     gen_VRE_STOR = gen.VreStorage
@@ -406,11 +399,10 @@ function write_vre_stor_discharge(
         dfDischarge_DC = DataFrame(
             Resource = inputs["RESOURCE_NAMES_DC_DISCHARGE"],
             Zone = inputs["ZONES_DC_DISCHARGE"],
-            AnnualSum = Array{Union{Missing,Float32}}(undef, size(DC_DISCHARGE)[1]),
+            AnnualSum = Array{Union{Missing, Float32}}(undef, size(DC_DISCHARGE)[1])
         )
-        power_vre_stor =
-            value.(EP[:vP_DC_DISCHARGE]).data .*
-            etainverter.(gen_VRE_STOR[(gen_VRE_STOR.stor_dc_discharge.!=0)])
+        power_vre_stor = value.(EP[:vP_DC_DISCHARGE]).data .*
+                         etainverter.(gen_VRE_STOR[(gen_VRE_STOR.stor_dc_discharge .!= 0)])
         if setup["ParameterScale"] == 1
             power_vre_stor *= ModelScalingFactor
         end
@@ -429,7 +421,7 @@ function write_vre_stor_discharge(
         dfDischarge_AC = DataFrame(
             Resource = inputs["RESOURCE_NAMES_AC_DISCHARGE"],
             Zone = inputs["ZONES_AC_DISCHARGE"],
-            AnnualSum = Array{Union{Missing,Float32}}(undef, size(AC_DISCHARGE)[1]),
+            AnnualSum = Array{Union{Missing, Float32}}(undef, size(AC_DISCHARGE)[1])
         )
         power_vre_stor = value.(EP[:vP_AC_DISCHARGE]).data
         if setup["ParameterScale"] == 1
@@ -450,7 +442,7 @@ function write_vre_stor_discharge(
         dfVP_VRE_STOR = DataFrame(
             Resource = inputs["RESOURCE_NAMES_WIND"],
             Zone = inputs["ZONES_WIND"],
-            AnnualSum = Array{Union{Missing,Float32}}(undef, size(WIND)[1]),
+            AnnualSum = Array{Union{Missing, Float32}}(undef, size(WIND)[1])
         )
         vre_vre_stor = value.(EP[:vP_WIND]).data
         if setup["ParameterScale"] == 1
@@ -471,11 +463,10 @@ function write_vre_stor_discharge(
         dfVP_VRE_STOR = DataFrame(
             Resource = inputs["RESOURCE_NAMES_SOLAR"],
             Zone = inputs["ZONES_SOLAR"],
-            AnnualSum = Array{Union{Missing,Float32}}(undef, size(SOLAR)[1]),
+            AnnualSum = Array{Union{Missing, Float32}}(undef, size(SOLAR)[1])
         )
-        vre_vre_stor =
-            value.(EP[:vP_SOLAR]).data .*
-            etainverter.(gen_VRE_STOR[(gen_VRE_STOR.solar.!=0)])
+        vre_vre_stor = value.(EP[:vP_SOLAR]).data .*
+                       etainverter.(gen_VRE_STOR[(gen_VRE_STOR.solar .!= 0)])
         if setup["ParameterScale"] == 1
             vre_vre_stor *= ModelScalingFactor
         end

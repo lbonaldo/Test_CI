@@ -5,17 +5,17 @@ function get_demand_dataframe(path)
     # update column names
     old_columns = find_matrix_columns_in_dataframe(
         df,
-        DEMAND_COLUMN_PREFIX_DEPRECATED()[1:end-1],
-        prefixseparator = 'z',
+        DEMAND_COLUMN_PREFIX_DEPRECATED()[1:(end - 1)],
+        prefixseparator = 'z'
     )
-    old_column_symbols =
-        Symbol.(DEMAND_COLUMN_PREFIX_DEPRECATED() * string(i) for i in old_columns)
+    old_column_symbols = Symbol.(DEMAND_COLUMN_PREFIX_DEPRECATED() * string(i)
+    for i in old_columns)
     if length(old_column_symbols) > 0
         pref_prefix = DEMAND_COLUMN_PREFIX()
         dep_prefix = DEMAND_COLUMN_PREFIX_DEPRECATED()
         @info "$dep_prefix is deprecated. Use $pref_prefix."
-        new_column_symbols =
-            Symbol.(DEMAND_COLUMN_PREFIX() * string(i) for i in old_columns)
+        new_column_symbols = Symbol.(DEMAND_COLUMN_PREFIX() * string(i)
+        for i in old_columns)
         rename!(df, Dict(old_column_symbols .=> new_column_symbols))
     end
     return df
@@ -59,8 +59,8 @@ function load_demand_data!(setup::Dict, path::AbstractString, inputs::Dict)
     inputs["H"] = convert(Int64, as_vector(:Timesteps_per_Rep_Period)[1])
 
     # Creating sub-period weights from weekly weights
-    for w = 1:inputs["REP_PERIOD"]
-        for h = 1:inputs["H"]
+    for w in 1:inputs["REP_PERIOD"]
+        for h in 1:inputs["H"]
             t = inputs["H"] * (w - 1) + h
             inputs["omega"][t] = inputs["Weights"][w] / inputs["H"]
         end
@@ -78,17 +78,16 @@ function load_demand_data!(setup::Dict, path::AbstractString, inputs::Dict)
     # Max value of non-served energy
     inputs["Voll"] = as_vector(:Voll) / scale_factor # convert from $/MWh $ million/GWh (assuming objective is divided by 1000)
     # Demand in MW
-    inputs["pD"] =
-        extract_matrix_from_dataframe(
-            demand_in,
-            DEMAND_COLUMN_PREFIX()[1:end-1],
-            prefixseparator = 'z',
-        ) / scale_factor
+    inputs["pD"] = extract_matrix_from_dataframe(
+        demand_in,
+        DEMAND_COLUMN_PREFIX()[1:(end - 1)],
+        prefixseparator = 'z'
+    ) / scale_factor
 
     # Cost of non-served energy/demand curtailment
     # Cost of each segment reported as a fraction of value of non-served energy - scaled implicitly
-    inputs["pC_D_Curtail"] =
-        as_vector(:Cost_of_Demand_Curtailment_per_MW) * inputs["Voll"][1]
+    inputs["pC_D_Curtail"] = as_vector(:Cost_of_Demand_Curtailment_per_MW) *
+                             inputs["Voll"][1]
     # Maximum hourly demand curtailable as % of the max demand (for each segment)
     inputs["pMax_D_Curtail"] = as_vector(:Max_Demand_Curtailment)
 
@@ -120,7 +119,7 @@ function validatetimebasis(inputs::Dict)
         generators_variability_length,
         fuel_costs_length,
         expected_length_1,
-        expected_length_2,
+        expected_length_2
     ]
 
     allequal(x) = all(y -> y == x[1], x)
@@ -175,7 +174,6 @@ This function prevents TimeDomainReduction from running on a case which
 already has more than one Representative Period or has more than one Sub_Weight specified.
 """
 function prevent_doubled_timedomainreduction(path::AbstractString)
-
     demand_in = get_demand_dataframe(path)
     as_vector(col::Symbol) = collect(skipmissing(demand_in[!, col]))
     representative_periods = convert(Int16, as_vector(:Rep_Periods)[1])
@@ -191,5 +189,4 @@ function prevent_doubled_timedomainreduction(path::AbstractString)
             Each of these must be 1: only a single period can have TimeDomainReduction applied.""",
         )
     end
-
 end

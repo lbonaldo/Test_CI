@@ -9,12 +9,11 @@ function write_co2(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
     write_co2_capture_plant(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
 end
 
-
 function write_co2_emissions_plant(
-    path::AbstractString,
-    inputs::Dict,
-    setup::Dict,
-    EP::Model,
+        path::AbstractString,
+        inputs::Dict,
+        setup::Dict,
+        EP::Model
 )
     gen = inputs["RESOURCES"]
     G = inputs["G"]     # Number of resources (generators, storage, DR, and DERs)
@@ -23,7 +22,7 @@ function write_co2_emissions_plant(
     dfEmissions_plant = DataFrame(
         Resource = inputs["RESOURCE_NAMES"],
         Zone = zone_id.(gen),
-        AnnualSum = zeros(G),
+        AnnualSum = zeros(G)
     )
     emissions_plant = value.(EP[:eEmissionsByPlant])
 
@@ -51,7 +50,7 @@ function write_co2_capture_plant(path::AbstractString, inputs::Dict, setup::Dict
     dfCapturedEmissions_plant = DataFrame(
         Resource = inputs["RESOURCE_NAMES"][CCS],
         Zone = zone_id.(gen[CCS]),
-        AnnualSum = zeros(length(CCS)),
+        AnnualSum = zeros(length(CCS))
     )
     if !isempty(CCS)
         # Captured CO2 emissions by plant
@@ -69,7 +68,7 @@ function write_co2_capture_plant(path::AbstractString, inputs::Dict, setup::Dict
             write_fulltimeseries(
                 filepath,
                 emissions_captured_plant,
-                dfCapturedEmissions_plant,
+                dfCapturedEmissions_plant
             )
         end
         return nothing

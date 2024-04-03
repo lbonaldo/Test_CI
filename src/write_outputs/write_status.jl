@@ -13,7 +13,7 @@ function write_status(path::AbstractString, inputs::Dict, setup::Dict, EP::Model
         dfStatus = DataFrame(
             Status = status,
             Solve = inputs["solve_time"],
-            Objval = objective_value(EP),
+            Objval = objective_value(EP)
         )
     else
         dfStatus = DataFrame(
@@ -21,7 +21,7 @@ function write_status(path::AbstractString, inputs::Dict, setup::Dict, EP::Model
             Solve = inputs["solve_time"],
             Objval = objective_value(EP),
             Objbound = objective_bound(EP),
-            FinalMIPGap = (objective_value(EP) - objective_bound(EP)) / objective_value(EP),
+            FinalMIPGap = (objective_value(EP) - objective_bound(EP)) / objective_value(EP)
         )
     end
     CSV.write(joinpath(path, "status.csv"), dfStatus)

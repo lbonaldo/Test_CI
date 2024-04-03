@@ -38,7 +38,7 @@ function run_timedomainreduction_multistage!(case::AbstractString)
     TDRSettingsDict = YAML.load(open(tdr_settings))
     if TDRSettingsDict["MultiStageConcatenate"] == 0
         println("Clustering Time Series Data (Individually)...")
-        for stage_id = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+        for stage_id in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
             cluster_inputs(case, settings_path, mysetup, stage_id)
         end
     else

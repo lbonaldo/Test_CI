@@ -27,7 +27,6 @@ function hoursbefore(p::Int, t::Int, b::UnitRange{Int})::Vector{Int}
     return period * p .+ mod1.(t .- b, p)
 end
 
-
 @doc raw"""
     hoursafter(p::Int, t::Int, a::Int)
 
@@ -55,7 +54,6 @@ time index t.
 function hoursafter(p::Int, t::Int, a::UnitRange{Int})::Vector{Int}
     period = div(t - 1, p)
     return period * p .+ mod1.(t .+ a, p)
-
 end
 
 @doc raw"""

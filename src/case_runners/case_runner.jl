@@ -86,8 +86,8 @@ function run_genx_case_simple!(case::AbstractString, mysetup::Dict, optimizer::A
     if has_values(EP)
         println("Writing Output")
         outputs_path = get_default_output_folder(case)
-        elapsed_time =
-            @elapsed outputs_path = write_outputs(EP, outputs_path, mysetup, myinputs)
+        elapsed_time = @elapsed outputs_path = write_outputs(
+            EP, outputs_path, mysetup, myinputs)
         println("Time elapsed for writing is")
         println(elapsed_time)
         if mysetup["ModelingToGenerateAlternatives"] == 1
@@ -101,7 +101,6 @@ function run_genx_case_simple!(case::AbstractString, mysetup::Dict, optimizer::A
         end
     end
 end
-
 
 function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimizer::Any)
     settings_path = get_settings_path(case)
@@ -121,7 +120,7 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
             if (mysetup["MultiStage"] == 1) &&
                (TDRSettingsDict["MultiStageConcatenate"] == 0)
                 println("Clustering Time Series Data (Individually)...")
-                for stage_id = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+                for stage_id in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
                     cluster_inputs(case, settings_path, mysetup, stage_id)
                 end
             else
@@ -140,7 +139,7 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
     model_dict = Dict()
     inputs_dict = Dict()
 
-    for t = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+    for t in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
 
         # Step 0) Set Model Year
         mysetup["MultiStageSettingsDict"]["CurStage"] = t
@@ -152,14 +151,13 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
         inputs_dict[t] = configure_multi_stage_inputs(
             inputs_dict[t],
             mysetup["MultiStageSettingsDict"],
-            mysetup["NetworkExpansion"],
+            mysetup["NetworkExpansion"]
         )
 
         compute_cumulative_min_retirements!(inputs_dict, t)
         # Step 2) Generate model
         model_dict[t] = generate_model(mysetup, inputs_dict[t], OPTIMIZER)
     end
-
 
     ### Solve model
     println("Solving Model")
@@ -184,7 +182,7 @@ function run_genx_case_multistage!(case::AbstractString, mysetup::Dict, optimize
         mkdir(outpath)
     end
 
-    for p = 1:mysetup["MultiStageSettingsDict"]["NumStages"]
+    for p in 1:mysetup["MultiStageSettingsDict"]["NumStages"]
         outpath_cur = joinpath(outpath, "results_p$p")
         write_outputs(model_dict[p], outpath_cur, mysetup, inputs_dict[p])
     end

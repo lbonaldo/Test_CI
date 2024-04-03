@@ -22,12 +22,11 @@ NOTE: The inv\_costs\_yr and crp arrays must be the same length; values with the
 returns: array object containing overnight capital costs, the discounted sum of annual investment costs incured within the model horizon.
 """
 function compute_overnight_capital_cost(
-    settings_d::Dict,
-    inv_costs_yr::Array,
-    crp::Array,
-    tech_wacc::Array,
+        settings_d::Dict,
+        inv_costs_yr::Array,
+        crp::Array,
+        tech_wacc::Array
 )
-
     cur_stage = settings_d["CurStage"] # Current model
     num_stages = settings_d["NumStages"] # Total number of model stages
     stage_lens = settings_d["StageLengths"]
@@ -43,9 +42,9 @@ function compute_overnight_capital_cost(
     # 2) Compute the present value of investment associated with capital recovery period within the model horizon - discounting to year 1 and not year 0
     #    (Factor to adjust discounting to year 0 for capital cost is included in the discounting coefficient applied to all terms in the objective function value.)
     occ = zeros(length(inv_costs_yr))
-    for i = 1:length(occ)
+    for i in 1:length(occ)
         occ[i] = sum(
-            inv_costs_yr[i] / (1 + tech_wacc[i]) .^ (p) for p = 1:payment_yrs_remaining[i]
+            inv_costs_yr[i] / (1 + tech_wacc[i]) .^ (p) for p in 1:payment_yrs_remaining[i]
         )
     end
 
@@ -75,11 +74,10 @@ inputs:
 returns: dictionary containing updated model inputs, to be used in the generate\_model() method.
 """
 function configure_multi_stage_inputs(
-    inputs_d::Dict,
-    settings_d::Dict,
-    NetworkExpansion::Int64,
+        inputs_d::Dict,
+        settings_d::Dict,
+        NetworkExpansion::Int64
 )
-
     gen = inputs_d["RESOURCES"]
 
     # Parameter inputs when multi-year discounting is activated
@@ -89,8 +87,8 @@ function configure_multi_stage_inputs(
     myopic = settings_d["Myopic"] == 1 # 1 if myopic (only one forward pass), 0 if full DDP
 
     # Define OPEXMULT here, include in inputs_dict[t] for use in dual_dynamic_programming.jl, transmission_multi_stage.jl, and investment_multi_stage.jl
-    OPEXMULT =
-        myopic ? 1 : sum([1 / (1 + wacc)^(i - 1) for i in range(1, stop = stage_len)])
+    OPEXMULT = myopic ? 1 :
+               sum([1 / (1 + wacc)^(i - 1) for i in range(1, stop = stage_len)])
     inputs_d["OPEXMULT"] = OPEXMULT
 
     if !myopic ### Leave myopic costs in annualized form and do not scale OPEX costs
@@ -100,19 +98,19 @@ function configure_multi_stage_inputs(
             settings_d,
             inv_cost_per_mwyr.(gen),
             capital_recovery_period.(gen),
-            tech_wacc.(gen),
+            tech_wacc.(gen)
         )
         gen.inv_cost_per_mwhyr = compute_overnight_capital_cost(
             settings_d,
             inv_cost_per_mwhyr.(gen),
             capital_recovery_period.(gen),
-            tech_wacc.(gen),
+            tech_wacc.(gen)
         )
         gen.inv_cost_charge_per_mwyr = compute_overnight_capital_cost(
             settings_d,
             inv_cost_charge_per_mwyr.(gen),
             capital_recovery_period.(gen),
-            tech_wacc.(gen),
+            tech_wacc.(gen)
         )
 
         # 2. Update fixed O&M costs to account for the possibility of more than 1 year between two model stages
@@ -128,59 +126,59 @@ function configure_multi_stage_inputs(
                 settings_d,
                 inv_cost_inverter_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_dc.(gen_VRE_STOR),
-                tech_wacc_dc.(gen_VRE_STOR),
+                tech_wacc_dc.(gen_VRE_STOR)
             )
             gen_VRE_STOR.inv_cost_solar_per_mwyr = compute_overnight_capital_cost(
                 settings_d,
                 inv_cost_solar_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_solar.(gen_VRE_STOR),
-                tech_wacc_solar.(gen_VRE_STOR),
+                tech_wacc_solar.(gen_VRE_STOR)
             )
             gen_VRE_STOR.inv_cost_wind_per_mwyr = compute_overnight_capital_cost(
                 settings_d,
                 inv_cost_wind_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_wind.(gen_VRE_STOR),
-                tech_wacc_wind.(gen_VRE_STOR),
+                tech_wacc_wind.(gen_VRE_STOR)
             )
             gen_VRE_STOR.inv_cost_discharge_dc_per_mwyr = compute_overnight_capital_cost(
                 settings_d,
                 inv_cost_discharge_dc_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_discharge_dc.(gen_VRE_STOR),
-                tech_wacc_discharge_dc.(gen_VRE_STOR),
+                tech_wacc_discharge_dc.(gen_VRE_STOR)
             )
             gen_VRE_STOR.inv_cost_charge_dc_per_mwyr = compute_overnight_capital_cost(
                 settings_d,
                 inv_cost_charge_dc_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_charge_dc.(gen_VRE_STOR),
-                tech_wacc_charge_dc.(gen_VRE_STOR),
+                tech_wacc_charge_dc.(gen_VRE_STOR)
             )
             gen_VRE_STOR.inv_cost_discharge_ac_per_mwyr = compute_overnight_capital_cost(
                 settings_d,
                 inv_cost_discharge_ac_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_discharge_ac.(gen_VRE_STOR),
-                tech_wacc_discharge_ac.(gen_VRE_STOR),
+                tech_wacc_discharge_ac.(gen_VRE_STOR)
             )
             gen_VRE_STOR.inv_cost_charge_ac_per_mwyr = compute_overnight_capital_cost(
                 settings_d,
                 inv_cost_charge_ac_per_mwyr.(gen_VRE_STOR),
                 capital_recovery_period_charge_ac.(gen_VRE_STOR),
-                tech_wacc_charge_ac.(gen_VRE_STOR),
+                tech_wacc_charge_ac.(gen_VRE_STOR)
             )
 
-            gen_VRE_STOR.fixed_om_inverter_cost_per_mwyr =
-                fixed_om_inverter_cost_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
-            gen_VRE_STOR.fixed_om_solar_cost_per_mwyr =
-                fixed_om_solar_cost_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
-            gen_VRE_STOR.fixed_om_wind_cost_per_mwyr =
-                fixed_om_wind_cost_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
-            gen_VRE_STOR.fixed_om_cost_discharge_dc_per_mwyr =
-                fixed_om_cost_discharge_dc_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
-            gen_VRE_STOR.fixed_om_cost_charge_dc_per_mwyr =
-                fixed_om_cost_charge_dc_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
-            gen_VRE_STOR.fixed_om_cost_discharge_ac_per_mwyr =
-                fixed_om_cost_discharge_ac_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
-            gen_VRE_STOR.fixed_om_cost_charge_ac_per_mwyr =
-                fixed_om_cost_charge_ac_per_mwyr.(gen_VRE_STOR) .* OPEXMULT
+            gen_VRE_STOR.fixed_om_inverter_cost_per_mwyr = fixed_om_inverter_cost_per_mwyr.(gen_VRE_STOR) .*
+                                                           OPEXMULT
+            gen_VRE_STOR.fixed_om_solar_cost_per_mwyr = fixed_om_solar_cost_per_mwyr.(gen_VRE_STOR) .*
+                                                        OPEXMULT
+            gen_VRE_STOR.fixed_om_wind_cost_per_mwyr = fixed_om_wind_cost_per_mwyr.(gen_VRE_STOR) .*
+                                                       OPEXMULT
+            gen_VRE_STOR.fixed_om_cost_discharge_dc_per_mwyr = fixed_om_cost_discharge_dc_per_mwyr.(gen_VRE_STOR) .*
+                                                               OPEXMULT
+            gen_VRE_STOR.fixed_om_cost_charge_dc_per_mwyr = fixed_om_cost_charge_dc_per_mwyr.(gen_VRE_STOR) .*
+                                                            OPEXMULT
+            gen_VRE_STOR.fixed_om_cost_discharge_ac_per_mwyr = fixed_om_cost_discharge_ac_per_mwyr.(gen_VRE_STOR) .*
+                                                               OPEXMULT
+            gen_VRE_STOR.fixed_om_cost_charge_ac_per_mwyr = fixed_om_cost_charge_ac_per_mwyr.(gen_VRE_STOR) .*
+                                                            OPEXMULT
         end
     end
 
@@ -199,24 +197,23 @@ function configure_multi_stage_inputs(
         inputs_d["RET_CAP_SOLAR"] = intersect(retirable, inputs_d["VS_SOLAR"])
         inputs_d["RET_CAP_WIND"] = intersect(retirable, inputs_d["VS_WIND"])
         inputs_d["RET_CAP_STOR"] = intersect(retirable, inputs_d["VS_STOR"])
-        inputs_d["RET_CAP_DISCHARGE_DC"] =
-            intersect(retirable, inputs_d["VS_ASYM_DC_DISCHARGE"])
+        inputs_d["RET_CAP_DISCHARGE_DC"] = intersect(
+            retirable, inputs_d["VS_ASYM_DC_DISCHARGE"])
         inputs_d["RET_CAP_CHARGE_DC"] = intersect(retirable, inputs_d["VS_ASYM_DC_CHARGE"])
-        inputs_d["RET_CAP_DISCHARGE_AC"] =
-            intersect(retirable, inputs_d["VS_ASYM_AC_DISCHARGE"])
+        inputs_d["RET_CAP_DISCHARGE_AC"] = intersect(
+            retirable, inputs_d["VS_ASYM_AC_DISCHARGE"])
         inputs_d["RET_CAP_CHARGE_AC"] = intersect(retirable, inputs_d["VS_ASYM_AC_CHARGE"])
     end
 
     # Transmission
     if NetworkExpansion == 1 && inputs_d["Z"] > 1
-
         if !myopic ### Leave myopic costs in annualized form
             # 1. Convert annualized tramsmission investment costs incured within the model horizon into overnight capital costs
             inputs_d["pC_Line_Reinforcement"] = compute_overnight_capital_cost(
                 settings_d,
                 inputs_d["pC_Line_Reinforcement"],
                 inputs_d["Capital_Recovery_Period_Trans"],
-                inputs_d["transmission_WACC"],
+                inputs_d["transmission_WACC"]
             )
         end
 

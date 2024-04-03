@@ -1,13 +1,13 @@
 function write_maximum_capacity_requirement(
-    path::AbstractString,
-    inputs::Dict,
-    setup::Dict,
-    EP::Model,
+        path::AbstractString,
+        inputs::Dict,
+        setup::Dict,
+        EP::Model
 )
     NumberOfMaxCapReqs = inputs["NumberOfMaxCapReqs"]
     dfMaxCapPrice = DataFrame(
-        Constraint = [Symbol("MaxCapReq_$maxcap") for maxcap = 1:NumberOfMaxCapReqs],
-        Price = -dual.(EP[:cZoneMaxCapReq]),
+        Constraint = [Symbol("MaxCapReq_$maxcap") for maxcap in 1:NumberOfMaxCapReqs],
+        Price = -dual.(EP[:cZoneMaxCapReq])
     )
 
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1

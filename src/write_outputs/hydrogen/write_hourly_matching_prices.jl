@@ -1,8 +1,8 @@
 function write_hourly_matching_prices(
-    path::AbstractString,
-    inputs::Dict,
-    setup::Dict,
-    EP::Model,
+        path::AbstractString,
+        inputs::Dict,
+        setup::Dict,
+        EP::Model
 )
     T = inputs["T"]     # Number of time steps (hours)
     Z = inputs["Z"]     # Number of zones
@@ -15,17 +15,17 @@ function write_hourly_matching_prices(
         dfHourlyMatchPrices,
         DataFrame(
             dual.(EP[:cHourlyMatching]).data ./ transpose(inputs["omega"]) * scale_factor,
-            :auto,
-        ),
+            :auto
+        )
     )
 
-    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t = 1:T]]
+    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t in 1:T]]
     rename!(dfHourlyMatchPrices, auxNew_Names)
 
     CSV.write(
         joinpath(path, "hourly_matching_prices.csv"),
         dftranspose(dfHourlyMatchPrices, false),
-        header = false,
+        header = false
     )
 
     return nothing

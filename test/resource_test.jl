@@ -10,7 +10,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 0,
-        :LDS => 0,
+        :LDS => 0
     )
 
     stor_lds = Resource(
@@ -21,7 +21,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 1,
-        :LDS => 1,
+        :LDS => 1
     )
 
     hydro_lds = Resource(
@@ -32,7 +32,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 0,
-        :LDS => 1,
+        :LDS => 1
     )
 
     bad_lds = Resource(
@@ -43,7 +43,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 0,
-        :LDS => 1,
+        :LDS => 1
     )
 
     bad_none = Resource(
@@ -54,7 +54,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 0,
-        :LDS => 0,
+        :LDS => 0
     )
 
     bad_twotypes = Resource(
@@ -65,7 +65,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 0,
-        :LDS => 0,
+        :LDS => 0
     )
 
     bad_multiple = Resource(
@@ -76,7 +76,7 @@ let
         :VRE => 0,
         :MUST_RUN => 0,
         :STOR => 0,
-        :LDS => 1,
+        :LDS => 1
     )
 
     # MUST_RUN units contribution to reserves
@@ -90,7 +90,7 @@ let
         :STOR => 0,
         :LDS => 0,
         :Reg_Max => 0,
-        :Rsv_Max => 0,
+        :Rsv_Max => 0
     )
     bad_must_run = Resource(
         :Resource => "bad_must_run",
@@ -102,7 +102,7 @@ let
         :STOR => 0,
         :LDS => 0,
         :Reg_Max => 0.083333333,
-        :Rsv_Max => 0.166666667,
+        :Rsv_Max => 0.166666667
     )
     bad_mustrun_reg = Resource(
         :Resource => "bad_mustrun_reg",
@@ -114,7 +114,7 @@ let
         :STOR => 0,
         :LDS => 0,
         :Reg_Max => 0.083333333,
-        :Rsv_Max => 0,
+        :Rsv_Max => 0
     )
     bad_mustrun_rsv = Resource(
         :Resource => "bad_mustrun_rsv",
@@ -126,7 +126,7 @@ let
         :STOR => 0,
         :LDS => 0,
         :Reg_Max => 0,
-        :Rsv_Max => 0.166666667,
+        :Rsv_Max => 0.166666667
     )
 
     function check_okay(resource)
@@ -165,6 +165,4 @@ let
     end
 
     test_validate_bad(multiple_bad_resources)
-
-
 end

@@ -17,7 +17,6 @@ where ${RETROFIT}$ represents the set of all retrofit IDs (clusters) in the mode
 
 """
 function retrofit(EP::Model, inputs::Dict)
-
     println("Retrofit Resources Module")
 
     gen = inputs["RESOURCES"]
@@ -27,47 +26,45 @@ function retrofit(EP::Model, inputs::Dict)
     RETROFIT_OPTIONS = inputs["RETROFIT_OPTIONS"] # Set of all resources being created
     RETROFIT_IDS = inputs["RETROFIT_IDS"] # Set of unique IDs for retrofit resources
 
-    @expression(
-        EP,
+    @expression(EP,
         eRetrofittedCapByRetroId[id in RETROFIT_IDS],
         sum(
-            cap_size(gen[y]) * EP[:vRETROFITCAP][y] for y in
-            intersect(RETROFIT_CAP, COMMIT, resources_in_retrofit_cluster_by_rid(gen, id));
-            init = 0,
-        ) + sum(
-            EP[:vRETROFITCAP][y] for y in setdiff(
+            cap_size(gen[y]) * EP[:vRETROFITCAP][y]
+            for y in intersect(
+                RETROFIT_CAP, COMMIT, resources_in_retrofit_cluster_by_rid(gen, id));
+            init = 0
+        )+sum(
+            EP[:vRETROFITCAP][y]
+            for y in setdiff(
                 intersect(RETROFIT_CAP, resources_in_retrofit_cluster_by_rid(gen, id)),
-                COMMIT,
+                COMMIT
             );
-            init = 0,
-        )
-    )
+            init = 0
+        ))
 
-    @expression(
-        EP,
+    @expression(EP,
         eRetrofitCapByRetroId[id in RETROFIT_IDS],
         sum(
-            cap_size(gen[y]) * EP[:vCAP][y] * (1 / retrofit_efficiency(gen[y])) for
+            cap_size(gen[y]) * EP[:vCAP][y] * (1 / retrofit_efficiency(gen[y]))
+            for
             y in intersect(
                 RETROFIT_OPTIONS,
                 COMMIT,
-                resources_in_retrofit_cluster_by_rid(gen, id),
+                resources_in_retrofit_cluster_by_rid(gen, id)
             );
-            init = 0,
-        ) + sum(
-            EP[:vCAP][y] * (1 / retrofit_efficiency(gen[y])) for y in setdiff(
+            init = 0
+        )+sum(
+            EP[:vCAP][y] * (1 / retrofit_efficiency(gen[y]))
+            for y in setdiff(
                 intersect(RETROFIT_OPTIONS, resources_in_retrofit_cluster_by_rid(gen, id)),
-                COMMIT,
+                COMMIT
             );
-            init = 0,
-        )
-    )
+            init = 0
+        ))
 
-    @constraint(
-        EP,
+    @constraint(EP,
         cRetrofitCapacity[id in RETROFIT_IDS],
-        eRetrofittedCapByRetroId[id] == eRetrofitCapByRetroId[id]
-    )
+        eRetrofittedCapByRetroId[id]==eRetrofitCapByRetroId[id])
 
     return EP
 end

@@ -23,7 +23,6 @@ Finally, we enforce the reference voltage phase angle constraint:
 
 """
 function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
-
     println("DC-OPF Module")
 
     T = inputs["T"]     # Number of time steps (hours)
@@ -38,30 +37,24 @@ function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
     ### DC-OPF constraints ###
 
     # Power flow constraint:: vFLOW = DC_OPF_coeff * (vANGLE[START_ZONE] - vANGLE[END_ZONE])
-    @constraint(
-        EP,
+    @constraint(EP,
         cPOWER_FLOW_OPF[l = 1:L, t = 1:T],
-        EP[:vFLOW][l, t] ==
+        EP[:vFLOW][l,
+            t]==
         inputs["pDC_OPF_coeff"][l] *
-        sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z = 1:Z)
-    )
+        sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z in 1:Z))
 
     # Bus angle limits (except slack bus)
-    @constraints(
-        EP,
+    @constraints(EP,
         begin
             cANGLE_ub[l = 1:L, t = 1:T],
-            sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z = 1:Z) <=
+            sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z in 1:Z) <=
             inputs["Line_Angle_Limit"][l]
             cANGLE_lb[l = 1:L, t = 1:T],
-            sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z = 1:Z) >=
+            sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z in 1:Z) >=
             -inputs["Line_Angle_Limit"][l]
-        end
-    )
+        end)
 
     # Slack Bus angle limit
-    @constraint(EP, cANGLE_SLACK[t = 1:T], vANGLE[1, t] == 0)
-
-
-
+    @constraint(EP, cANGLE_SLACK[t = 1:T], vANGLE[1, t]==0)
 end

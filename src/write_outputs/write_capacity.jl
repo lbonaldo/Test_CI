@@ -4,7 +4,6 @@
 Function for writing the diferent capacities for the different generation technologies (starting capacities or, existing capacities, retired capacities, and new-built capacities).
 """
 function write_capacity(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
-
     gen = inputs["RESOURCES"]
 
     MultiStage = setup["MultiStage"]
@@ -37,7 +36,6 @@ function write_capacity(path::AbstractString, inputs::Dict, setup::Dict, EP::Mod
         end
     end
 
-
     capacity_constraint_dual = zeros(size(inputs["RESOURCE_NAMES"]))
     for y in ids_with_positive(gen, max_cap_mw)
         capacity_constraint_dual[y] = -dual.(EP[:cMaxCap][y])
@@ -53,9 +51,8 @@ function write_capacity(path::AbstractString, inputs::Dict, setup::Dict, EP::Mod
         if i in inputs["RET_CAP_CHARGE"]
             retcapcharge[i] = value(EP[:vRETCAPCHARGE][i])
         end
-        existingcapcharge[i] =
-            MultiStage == 1 ? value(EP[:vEXISTINGCAPCHARGE][i]) :
-            existing_charge_cap_mw(gen[i])
+        existingcapcharge[i] = MultiStage == 1 ? value(EP[:vEXISTINGCAPCHARGE][i]) :
+                               existing_charge_cap_mw(gen[i])
     end
 
     capenergy = zeros(size(inputs["RESOURCE_NAMES"]))
@@ -68,8 +65,8 @@ function write_capacity(path::AbstractString, inputs::Dict, setup::Dict, EP::Mod
         if i in inputs["RET_CAP_ENERGY"]
             retcapenergy[i] = value(EP[:vRETCAPENERGY][i])
         end
-        existingcapenergy[i] =
-            MultiStage == 1 ? value(EP[:vEXISTINGCAPENERGY][i]) : existing_cap_mwh(gen[i])
+        existingcapenergy[i] = MultiStage == 1 ? value(EP[:vEXISTINGCAPENERGY][i]) :
+                               existing_cap_mwh(gen[i])
     end
     if !isempty(inputs["VRE_STOR"])
         for i in inputs["VS_STOR"]
@@ -99,7 +96,7 @@ function write_capacity(path::AbstractString, inputs::Dict, setup::Dict, EP::Mod
         StartChargeCap = existingcapcharge[:],
         RetChargeCap = retcapcharge[:],
         NewChargeCap = capcharge[:],
-        EndChargeCap = existingcapcharge[:] - retcapcharge[:] + capcharge[:],
+        EndChargeCap = existingcapcharge[:] - retcapcharge[:] + capcharge[:]
     )
     if setup["ParameterScale"] == 1
         dfCap.StartCap = dfCap.StartCap * ModelScalingFactor
@@ -134,7 +131,7 @@ function write_capacity(path::AbstractString, inputs::Dict, setup::Dict, EP::Mod
         StartChargeCap = sum(dfCap[!, :StartChargeCap]),
         RetChargeCap = sum(dfCap[!, :RetChargeCap]),
         NewChargeCap = sum(dfCap[!, :NewChargeCap]),
-        EndChargeCap = sum(dfCap[!, :EndChargeCap]),
+        EndChargeCap = sum(dfCap[!, :EndChargeCap])
     )
 
     dfCap = vcat(dfCap, total)

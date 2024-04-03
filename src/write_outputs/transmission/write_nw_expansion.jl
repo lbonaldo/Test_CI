@@ -3,7 +3,7 @@ function write_nw_expansion(path::AbstractString, inputs::Dict, setup::Dict, EP:
 
     # Transmission network reinforcements
     transcap = zeros(L)
-    for i = 1:L
+    for i in 1:L
         if i in inputs["EXPANSION_LINES"]
             transcap[i] = value.(EP[:vNEW_TRANS_CAP][i])
         end
@@ -14,8 +14,8 @@ function write_nw_expansion(path::AbstractString, inputs::Dict, setup::Dict, EP:
         New_Trans_Capacity = convert(Array{Float64}, transcap),
         Cost_Trans_Capacity = convert(
             Array{Float64},
-            transcap .* inputs["pC_Line_Reinforcement"],
-        ),
+            transcap .* inputs["pC_Line_Reinforcement"]
+        )
     )
 
     if setup["ParameterScale"] == 1

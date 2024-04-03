@@ -1,5 +1,5 @@
 function default_settings()
-    Dict{Any,Any}(
+    Dict{Any, Any}(
         "PrintModel" => 0,
         "OverwriteResults" => 0,
         "NetworkExpansion" => 0,
@@ -31,7 +31,7 @@ function default_settings()
         "ResourcesFolder" => "resources",
         "ResourcePoliciesFolder" => "policy_assignments",
         "SystemFolder" => "system",
-        "PoliciesFolder" => "policies",
+        "PoliciesFolder" => "policies"
     )
 end
 
@@ -63,7 +63,7 @@ function configure_settings(settings_path::String, output_settings_path::String)
     return settings
 end
 
-function validate_settings!(settings::Dict{Any,Any})
+function validate_settings!(settings::Dict{Any, Any})
     # Check for any settings combinations that are not allowed.
     # If we find any then make a response and issue a note to the user.
 
@@ -75,7 +75,7 @@ function validate_settings!(settings::Dict{Any,Any})
         @warn """The behavior of the TimeDomainReduction and OperationWrapping
         settings have changed recently. OperationWrapping has been removed,
         and is ignored. The relevant behavior is now controlled by TimeDomainReduction.
-        Please see the Methods page in the documentation.""" maxlog = 1
+        Please see the Methods page in the documentation.""" maxlog=1
     end
 
     if haskey(settings, "Reserves")
@@ -83,7 +83,7 @@ function validate_settings!(settings::Dict{Any,Any})
             """The Reserves setting has been deprecated. Please use the
 OperationalReserves setting instead.""",
             :validate_settings!,
-            force = true,
+            force = true
         )
         settings["OperationalReserves"] = settings["Reserves"]
         delete!(settings, "Reserves")
@@ -92,11 +92,10 @@ OperationalReserves setting instead.""",
     if settings["EnableJuMPStringNames"] == 0 && settings["ComputeConflicts"] == 1
         settings["EnableJuMPStringNames"] = 1
     end
-
 end
 
 function default_writeoutput()
-    Dict{String,Bool}(
+    Dict{String, Bool}(
         "WriteCosts" => true,
         "WriteCapacity" => true,
         "WriteCapacityValue" => true,
@@ -143,12 +142,11 @@ function default_writeoutput()
         "WriteTransmissionLosses" => true,
         "WriteVirtualDischarge" => true,
         "WriteVREStor" => true,
-        "WriteAngles" => true,
+        "WriteAngles" => true
     )
 end
 
 function configure_writeoutput(output_settings_path::String, settings::Dict)
-
     writeoutput = default_writeoutput()
 
     # don't write files with hourly data if settings["WriteOutputs"] == "annual"

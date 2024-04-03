@@ -13,16 +13,15 @@ function write_reliability(path::AbstractString, inputs::Dict, setup::Dict, EP::
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
     dfReliability = hcat(
         dfReliability,
-        DataFrame(transpose(dual.(EP[:cMaxNSE]) ./ inputs["omega"] * scale_factor), :auto),
+        DataFrame(transpose(dual.(EP[:cMaxNSE]) ./ inputs["omega"] * scale_factor), :auto)
     )
 
-    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t = 1:T]]
+    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t in 1:T]]
     rename!(dfReliability, auxNew_Names)
 
     CSV.write(
         joinpath(path, "reliability.csv"),
         dftranspose(dfReliability, false),
-        header = false,
+        header = false
     )
-
 end

@@ -61,7 +61,6 @@ In case the reservoir capacity is known ($y \in W^{cap}$), then an additional co
 ```
 """
 function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
-
     println("Hydro Reservoir Core Resources Module")
 
     gen = inputs["RESOURCES"]
@@ -87,43 +86,35 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
     if setup["OperationalReserves"] > 0
         HYDRO_RES_REG = intersect(HYDRO_RES, inputs["REG"]) # Set of reservoir hydro resources with regulation reserves
         HYDRO_RES_RSV = intersect(HYDRO_RES, inputs["RSV"]) # Set of reservoir hydro resources with spinning reserves
-        regulation_term = @expression(
-            EP,
+        regulation_term = @expression(EP,
             [y in HYDRO_RES, t in 1:T],
-            y ∈ HYDRO_RES_REG ? EP[:vREG][y, t] - EP[:vREG][y, hoursbefore(p, t, 1)] : 0
-        )
-        reserves_term = @expression(
-            EP,
+            y ∈ HYDRO_RES_REG ? EP[:vREG][y, t] - EP[:vREG][y, hoursbefore(p, t, 1)] : 0)
+        reserves_term = @expression(EP,
             [y in HYDRO_RES, t in 1:T],
-            y ∈ HYDRO_RES_RSV ? EP[:vRSV][y, t] : 0
-        )
+            y ∈ HYDRO_RES_RSV ? EP[:vRSV][y, t] : 0)
     end
 
     ### Variables ###
 
     # Reservoir hydro storage level of resource "y" at hour "t" [MWh] on zone "z" - unbounded
-    @variable(EP, vS_HYDRO[y in HYDRO_RES, t = 1:T] >= 0)
+    @variable(EP, vS_HYDRO[y in HYDRO_RES, t = 1:T]>=0)
 
     # Hydro reservoir overflow (water spill) variable
-    @variable(EP, vSPILL[y in HYDRO_RES, t = 1:T] >= 0)
+    @variable(EP, vSPILL[y in HYDRO_RES, t = 1:T]>=0)
 
     ### Expressions ###
 
     ## Power Balance Expressions ##
-    @expression(
-        EP,
+    @expression(EP,
         ePowerBalanceHydroRes[t = 1:T, z = 1:Z],
-        sum(EP[:vP][y, t] for y in intersect(HYDRO_RES, resources_in_zone_by_rid(gen, z)))
-    )
+        sum(EP[:vP][y, t] for y in intersect(HYDRO_RES, resources_in_zone_by_rid(gen, z))))
     add_similar_to_expression!(EP[:ePowerBalance], ePowerBalanceHydroRes)
 
     # Capacity Reserves Margin policy
     if setup["CapacityReserveMargin"] > 0
-        @expression(
-            EP,
+        @expression(EP,
             eCapResMarBalanceHydro[res = 1:inputs["NCapacityReserveMargin"], t = 1:T],
-            sum(derating_factor(gen[y], tag = res) * EP[:vP][y, t] for y in HYDRO_RES)
-        )
+            sum(derating_factor(gen[y], tag = res) * EP[:vP][y, t] for y in HYDRO_RES))
         add_similar_to_expression!(EP[:eCapResMarBalance], eCapResMarBalanceHydro)
     end
 
@@ -135,18 +126,16 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
         CONSTRAINTSET = HYDRO_RES
     end
 
-    @constraint(
-        EP,
+    @constraint(EP,
         cHydroReservoirStart[y in CONSTRAINTSET, t in START_SUBPERIODS],
-        EP[:vS_HYDRO][y, t] ==
+        EP[:vS_HYDRO][y,
+            t]==
         EP[:vS_HYDRO][y, hoursbefore(p, t, 1)] -
         (1 / efficiency_down(gen[y]) * EP[:vP][y, t]) - vSPILL[y, t] +
-        inputs["pP_Max"][y, t] * EP[:eTotalCap][y]
-    )
+        inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
 
     ### Constraints commmon to all reservoir hydro (y in set HYDRO_RES) ###
-    @constraints(
-        EP,
+    @constraints(EP,
         begin
             ### NOTE: time coupling constraints in this block do not apply to first hour in each sample period;
             # Energy stored in reservoir at end of each other hour is equal to energy at end of prior hour less generation and spill and + inflows in the current hour
@@ -181,29 +170,23 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
             cHydroMaxPower[y in HYDRO_RES, t in 1:T], EP[:vP][y, t] <= EP[:eTotalCap][y]
             cHydroMaxOutflow[y in HYDRO_RES, t in 1:T],
             EP[:vP][y, t] <= EP[:vS_HYDRO][y, hoursbefore(p, t, 1)]
-        end
-    )
+        end)
 
     ### Constraints to limit maximum energy in storage based on known limits on reservoir energy capacity (only for HYDRO_RES_KNOWN_CAP)
     # Maximum energy stored in reservoir must be less than energy capacity in all hours - only applied to HYDRO_RES_KNOWN_CAP
-    @constraint(
-        EP,
+    @constraint(EP,
         cHydroMaxEnergy[y in HYDRO_RES_KNOWN_CAP, t in 1:T],
-        EP[:vS_HYDRO][y, t] <= hydro_energy_to_power_ratio(gen[y]) * EP[:eTotalCap][y]
-    )
+        EP[:vS_HYDRO][y, t]<=hydro_energy_to_power_ratio(gen[y]) * EP[:eTotalCap][y])
 
     if setup["OperationalReserves"] == 1
         ### Reserve related constraints for reservoir hydro resources (y in HYDRO_RES), if used
         hydro_res_operational_reserves!(EP, inputs)
     end
     ##CO2 Polcy Module Hydro Res Generation by zone
-    @expression(
-        EP,
+    @expression(EP,
         eGenerationByHydroRes[z = 1:Z, t = 1:T], # the unit is GW
-        sum(EP[:vP][y, t] for y in intersect(HYDRO_RES, resources_in_zone_by_rid(gen, z)))
-    )
+        sum(EP[:vP][y, t] for y in intersect(HYDRO_RES, resources_in_zone_by_rid(gen, z))))
     add_similar_to_expression!(EP[:eGenerationByZone], eGenerationByHydroRes)
-
 end
 
 @doc raw"""
@@ -236,7 +219,6 @@ r_{y,z, t} \leq \upsilon^{rsv}_{y,z}\times \Delta^{total}_{y,z}
 ```
 """
 function hydro_res_operational_reserves!(EP::Model, inputs::Dict)
-
     println("Hydro Reservoir Operational Reserves Module")
 
     gen = inputs["RESOURCES"]
@@ -265,17 +247,13 @@ function hydro_res_operational_reserves!(EP::Model, inputs::Dict)
     S = HYDRO_RES_RSV
     add_similar_to_expression!(max_up_reserves_lhs[S, :], vRSV[S, :])
 
-    @constraint(EP, [y in HYDRO_RES, t in 1:T], max_up_reserves_lhs[y, t] <= eTotalCap[y])
-    @constraint(EP, [y in HYDRO_RES, t in 1:T], max_dn_reserves_lhs[y, t] >= 0)
+    @constraint(EP, [y in HYDRO_RES, t in 1:T], max_up_reserves_lhs[y, t]<=eTotalCap[y])
+    @constraint(EP, [y in HYDRO_RES, t in 1:T], max_dn_reserves_lhs[y, t]>=0)
 
-    @constraint(
-        EP,
+    @constraint(EP,
         [y in HYDRO_RES_REG, t in 1:T],
-        vREG[y, t] <= reg_max(gen[y]) * eTotalCap[y]
-    )
-    @constraint(
-        EP,
+        vREG[y, t]<=reg_max(gen[y]) * eTotalCap[y])
+    @constraint(EP,
         [y in HYDRO_RES_RSV, t in 1:T],
-        vRSV[y, t] <= rsv_max(gen[y]) * eTotalCap[y]
-    )
+        vRSV[y, t]<=rsv_max(gen[y]) * eTotalCap[y])
 end

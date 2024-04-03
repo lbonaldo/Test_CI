@@ -4,8 +4,7 @@ using Dates
 using CSV, DataFrames
 using Logging, LoggingExtras
 
-
-const TestResult = Union{Test.Result,String}
+const TestResult = Union{Test.Result, String}
 
 # Exception to throw if a csv file is not found
 struct CSVFileNotFound <: Exception
@@ -14,9 +13,9 @@ end
 Base.showerror(io::IO, e::CSVFileNotFound) = print(io, e.filefullpath, " not found")
 
 function run_genx_case_testing(
-    test_path::AbstractString,
-    test_setup::Dict,
-    optimizer::Any = HiGHS.Optimizer,
+        test_path::AbstractString,
+        test_setup::Dict,
+        optimizer::Any = HiGHS.Optimizer
 )
     # Merge the genx_setup with the default settings
     settings = GenX.default_settings()
@@ -37,9 +36,9 @@ function run_genx_case_testing(
 end
 
 function run_genx_case_conflict_testing(
-    test_path::AbstractString,
-    test_setup::Dict,
-    optimizer::Any = HiGHS.Optimizer,
+        test_path::AbstractString,
+        test_setup::Dict,
+        optimizer::Any = HiGHS.Optimizer
 )
 
     # Merge the genx_setup with the default settings
@@ -60,9 +59,9 @@ function run_genx_case_conflict_testing(
 end
 
 function run_genx_case_simple_testing(
-    test_path::AbstractString,
-    genx_setup::Dict,
-    optimizer::Any,
+        test_path::AbstractString,
+        genx_setup::Dict,
+        optimizer::Any
 )
     # Run the case
     OPTIMIZER = configure_solver(test_path, optimizer)
@@ -73,9 +72,9 @@ function run_genx_case_simple_testing(
 end
 
 function run_genx_case_multistage_testing(
-    test_path::AbstractString,
-    genx_setup::Dict,
-    optimizer::Any,
+        test_path::AbstractString,
+        genx_setup::Dict,
+        optimizer::Any
 )
     # Run the case
     OPTIMIZER = configure_solver(test_path, optimizer)
@@ -83,7 +82,7 @@ function run_genx_case_multistage_testing(
     model_dict = Dict()
     inputs_dict = Dict()
 
-    for t = 1:genx_setup["MultiStageSettingsDict"]["NumStages"]
+    for t in 1:genx_setup["MultiStageSettingsDict"]["NumStages"]
         # Step 0) Set Model Year
         genx_setup["MultiStageSettingsDict"]["CurStage"] = t
 
@@ -93,7 +92,7 @@ function run_genx_case_multistage_testing(
         inputs_dict[t] = configure_multi_stage_inputs(
             inputs_dict[t],
             genx_setup["MultiStageSettingsDict"],
-            genx_setup["NetworkExpansion"],
+            genx_setup["NetworkExpansion"]
         )
 
         compute_cumulative_min_retirements!(inputs_dict, t)
@@ -105,11 +104,10 @@ function run_genx_case_multistage_testing(
     return model_dict, inputs_dict, OPTIMIZER
 end
 
-
 function write_testlog(
-    test_path::AbstractString,
-    message::AbstractString,
-    test_result::TestResult,
+        test_path::AbstractString,
+        message::AbstractString,
+        test_result::TestResult
 )
     # Save the results to a log file
     # Format: datetime, message, test result
@@ -133,10 +131,10 @@ function write_testlog(
 end
 
 function write_testlog(
-    test_path::AbstractString,
-    obj_test::Real,
-    optimal_tol::Real,
-    test_result::TestResult,
+        test_path::AbstractString,
+        obj_test::Real,
+        optimal_tol::Real,
+        test_result::TestResult
 )
     # Save the results to a log file
     # Format: datetime, objective value ± tolerance, test result
@@ -145,10 +143,10 @@ function write_testlog(
 end
 
 function write_testlog(
-    test_path::AbstractString,
-    obj_test::Vector{<:Real},
-    optimal_tol::Vector{<:Real},
-    test_result::TestResult,
+        test_path::AbstractString,
+        obj_test::Vector{<:Real},
+        optimal_tol::Vector{<:Real},
+        test_result::TestResult
 )
     # Save the results to a log file
     # Format: datetime, [objective value ± tolerance], test result
@@ -234,9 +232,8 @@ function isapprox_col(col1, col2)
                 break
             elseif !isnothing(tryparse(Float64, col1[i])) &&
                    !isnothing(tryparse(Float64, col2[i]))
-                isapprox_col =
-                    isapprox_col &&
-                    isapprox(parse(Float64, col1[i]), parse(Float64, col2[i]))
+                isapprox_col = isapprox_col &&
+                               isapprox(parse(Float64, col1[i]), parse(Float64, col2[i]))
             else
                 isapprox_col = isapprox_col && isequal(col1[i], col2[i])
             end
@@ -245,7 +242,6 @@ function isapprox_col(col1, col2)
     end
     return false
 end
-
 
 macro warn_error_logger(block)
     quote

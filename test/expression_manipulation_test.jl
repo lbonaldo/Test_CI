@@ -3,11 +3,11 @@ using HiGHS
 
 function setup_sum_model()
     EP = Model(HiGHS.Optimizer)
-    @variable(EP, x[i = 1:100, j = 1:4:200] >= 0)
-    @variable(EP, y[i = 1:100, j = 1:50] >= 0)
-    @expression(EP, eX[i = 1:100, j = 1:4:200], 2.0 * x[i, j] + i + 10.0 * j)
-    @expression(EP, eY[i = 1:100, j = 1:50], 3.0 * y[i, j] + 2 * i + j)
-    @expression(EP, eZ[i = 1:100, j = 1:50], 2.0 * x[i, (j-1)*4+1] + 4.0 * y[i, j])
+    @variable(EP, x[i = 1:100, j = 1:4:200]>=0)
+    @variable(EP, y[i = 1:100, j = 1:50]>=0)
+    @expression(EP, eX[i = 1:100, j = 1:4:200], 2.0*x[i, j]+i+10.0*j)
+    @expression(EP, eY[i = 1:100, j = 1:50], 3.0*y[i, j]+2*i+j)
+    @expression(EP, eZ[i = 1:100, j = 1:50], 2.0 * x[i, (j - 1) * 4 + 1]+4.0 * y[i, j])
     return EP
 end
 
@@ -65,12 +65,12 @@ let
     EP = Model(HiGHS.Optimizer)
 
     # Test fill_with_zeros!
-    small_zeros_expr = Array{AffExpr,2}(undef, (2, 3))
+    small_zeros_expr = Array{AffExpr, 2}(undef, (2, 3))
     GenX.fill_with_zeros!(small_zeros_expr)
     @test small_zeros_expr == AffExpr.([0.0 0.0 0.0; 0.0 0.0 0.0])
 
     # Test fill_with_const!
-    small_const_expr = Array{AffExpr,2}(undef, (3, 2))
+    small_const_expr = Array{AffExpr, 2}(undef, (3, 2))
     GenX.fill_with_const!(small_const_expr, 6.0)
     @test small_const_expr == AffExpr.([6.0 6.0; 6.0 6.0; 6.0 6.0])
 
@@ -96,11 +96,11 @@ let
     GenX.create_empty_expression!(EP, :small_expr, (2, 3))
     @test_throws ErrorException GenX.add_similar_to_expression!(
         EP[:large_expr],
-        EP[:small_expr],
+        EP[:small_expr]
     )
 
     # Test we can add variables to an expression using add_similar_to_expression!
-    @variable(EP, test_var[1:large_dims[1], 1:large_dims[2], 1:large_dims[3]] >= 0)
+    @variable(EP, test_var[1:large_dims[1], 1:large_dims[2], 1:large_dims[3]]>=0)
     GenX.add_similar_to_expression!(EP[:large_expr], test_var)
     @test EP[:large_expr][100] == test_var[100] + 18.0
 
@@ -120,7 +120,7 @@ let
     @test sum_combo_expr() == true
 
     # Test add_term_to_expression! for variable
-    @variable(EP, single_var >= 0)
+    @variable(EP, single_var>=0)
     GenX.add_term_to_expression!(EP[:large_expr], single_var)
     @test EP[:large_expr][100] == test_var[100] + 22.0 + single_var
 

@@ -12,13 +12,13 @@ function write_curtailment(path::AbstractString, inputs::Dict, setup::Dict, EP::
     dfCurtailment = DataFrame(
         Resource = inputs["RESOURCE_NAMES"],
         Zone = zone_id.(gen),
-        AnnualSum = zeros(G),
+        AnnualSum = zeros(G)
     )
     curtailment = zeros(G, T)
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
-    curtailment[VRE, :] =
-        scale_factor *
-        (value.(EP[:eTotalCap][VRE]) .* inputs["pP_Max"][VRE, :] .- value.(EP[:vP][VRE, :]))
+    curtailment[VRE, :] = scale_factor *
+                          (value.(EP[:eTotalCap][VRE]) .* inputs["pP_Max"][VRE, :] .-
+                           value.(EP[:vP][VRE, :]))
 
     VRE_STOR = inputs["VRE_STOR"]
     if !isempty(VRE_STOR)
@@ -27,36 +27,33 @@ function write_curtailment(path::AbstractString, inputs::Dict, setup::Dict, EP::
         SOLAR_WIND = intersect(inputs["VS_SOLAR"], inputs["VS_WIND"])
         gen_VRE_STOR = gen.VreStorage
         if !isempty(SOLAR)
-            curtailment[SOLAR, :] =
-                scale_factor * (
-                    value.(EP[:eTotalCap_SOLAR][SOLAR]).data .*
-                    inputs["pP_Max_Solar"][SOLAR, :] .-
-                    value.(EP[:vP_SOLAR][SOLAR, :]).data
-                ) .* etainverter.(gen_VRE_STOR[(gen_VRE_STOR.solar.!=0)])
+            curtailment[SOLAR, :] = scale_factor * (
+                value.(EP[:eTotalCap_SOLAR][SOLAR]).data .*
+                inputs["pP_Max_Solar"][SOLAR, :] .-
+                value.(EP[:vP_SOLAR][SOLAR, :]).data
+            ) .* etainverter.(gen_VRE_STOR[(gen_VRE_STOR.solar .!= 0)])
         end
         if !isempty(WIND)
-            curtailment[WIND, :] =
-                scale_factor * (
-                    value.(EP[:eTotalCap_WIND][WIND]).data .*
-                    inputs["pP_Max_Wind"][WIND, :] .- value.(EP[:vP_WIND][WIND, :]).data
-                )
+            curtailment[WIND, :] = scale_factor * (
+                value.(EP[:eTotalCap_WIND][WIND]).data .*
+                inputs["pP_Max_Wind"][WIND, :] .- value.(EP[:vP_WIND][WIND, :]).data
+            )
         end
         if !isempty(SOLAR_WIND)
-            curtailment[SOLAR_WIND, :] =
-                scale_factor * (
-                    (
-                        value.(EP[:eTotalCap_SOLAR])[SOLAR_WIND].data .*
-                        inputs["pP_Max_Solar"][SOLAR_WIND, :] .-
-                        value.(EP[:vP_SOLAR][SOLAR_WIND, :]).data
-                    ) .*
-                    etainverter.(
-                        gen_VRE_STOR[((gen_VRE_STOR.wind.!=0).&(gen_VRE_STOR.solar.!=0))]
-                    ) + (
-                        value.(EP[:eTotalCap_WIND][SOLAR_WIND]).data .*
-                        inputs["pP_Max_Wind"][SOLAR_WIND, :] .-
-                        value.(EP[:vP_WIND][SOLAR_WIND, :]).data
-                    )
-                )
+            curtailment[SOLAR_WIND, :] = scale_factor * (
+                (
+                value.(EP[:eTotalCap_SOLAR])[SOLAR_WIND].data .*
+                inputs["pP_Max_Solar"][SOLAR_WIND, :] .-
+                value.(EP[:vP_SOLAR][SOLAR_WIND, :]).data
+            ) .*
+                etainverter.(
+                gen_VRE_STOR[((gen_VRE_STOR.wind .!= 0) .& (gen_VRE_STOR.solar .!= 0))]
+            ) + (
+                value.(EP[:eTotalCap_WIND][SOLAR_WIND]).data .*
+                inputs["pP_Max_Wind"][SOLAR_WIND, :] .-
+                value.(EP[:vP_WIND][SOLAR_WIND, :]).data
+            )
+            )
         end
     end
 

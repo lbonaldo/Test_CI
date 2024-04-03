@@ -11,7 +11,6 @@
 Function for the entry-point for writing the different output files. From here, onward several other functions are called, each for writing specific output files, like costs, capacities, etc.
 """
 function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dict)
-
     if setup["OverwriteResults"] == 1
         # Overwrite existing results if dir exists
         # This is the default behaviour when there is no flag, to avoid breaking existing code
@@ -119,8 +118,8 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
         end
 
         if output_settings_d["WriteTransmissionLosses"]
-            elapsed_time_losses =
-                @elapsed write_transmission_losses(path, inputs, setup, EP)
+            elapsed_time_losses = @elapsed write_transmission_losses(
+                path, inputs, setup, EP)
             println("Time elapsed for writing transmission losses is")
             println(elapsed_time_losses)
         end
@@ -141,8 +140,8 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
     dfVreStor = DataFrame()
     if !isempty(inputs["VRE_STOR"])
         if output_settings_d["WriteVREStor"] || output_settings_d["WriteNetRevenue"]
-            elapsed_time_vrestor =
-                @elapsed dfVreStor = write_vre_stor(path, inputs, setup, EP)
+            elapsed_time_vrestor = @elapsed dfVreStor = write_vre_stor(
+                path, inputs, setup, EP)
             println("Time elapsed for writing vre stor is")
             println(elapsed_time_vrestor)
         end
@@ -207,23 +206,23 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
     if representative_periods > 1 &&
        (!isempty(inputs["STOR_LONG_DURATION"]) || !isempty(VS_LDS))
         if output_settings_d["WriteOpWrapLDSStorInit"]
-            elapsed_time_lds_init =
-                @elapsed write_opwrap_lds_stor_init(path, inputs, setup, EP)
+            elapsed_time_lds_init = @elapsed write_opwrap_lds_stor_init(
+                path, inputs, setup, EP)
             println("Time elapsed for writing lds init is")
             println(elapsed_time_lds_init)
         end
 
         if output_settings_d["WriteOpWrapLDSdStor"]
-            elapsed_time_lds_dstor =
-                @elapsed write_opwrap_lds_dstor(path, inputs, setup, EP)
+            elapsed_time_lds_dstor = @elapsed write_opwrap_lds_dstor(
+                path, inputs, setup, EP)
             println("Time elapsed for writing lds dstor is")
             println(elapsed_time_lds_dstor)
         end
     end
 
     if output_settings_d["WriteFuelConsumption"]
-        elapsed_time_fuel_consumption =
-            @elapsed write_fuel_consumption(path, inputs, setup, EP)
+        elapsed_time_fuel_consumption = @elapsed write_fuel_consumption(
+            path, inputs, setup, EP)
         println("Time elapsed for writing fuel consumption is")
         println(elapsed_time_fuel_consumption)
     end
@@ -260,24 +259,24 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
 
             if output_settings_d["WriteEnergyRevenue"] ||
                output_settings_d["WriteNetRevenue"]
-                elapsed_time_energy_rev =
-                    @elapsed dfEnergyRevenue = write_energy_revenue(path, inputs, setup, EP)
+                elapsed_time_energy_rev = @elapsed dfEnergyRevenue = write_energy_revenue(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing energy revenue is")
                 println(elapsed_time_energy_rev)
             end
 
             if output_settings_d["WriteChargingCost"] ||
                output_settings_d["WriteNetRevenue"]
-                elapsed_time_charging_cost =
-                    @elapsed dfChargingcost = write_charging_cost(path, inputs, setup, EP)
+                elapsed_time_charging_cost = @elapsed dfChargingcost = write_charging_cost(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing charging cost is")
                 println(elapsed_time_charging_cost)
             end
 
             if output_settings_d["WriteSubsidyRevenue"] ||
                output_settings_d["WriteNetRevenue"]
-                elapsed_time_subsidy = @elapsed dfSubRevenue, dfRegSubRevenue =
-                    write_subsidy_revenue(path, inputs, setup, EP)
+                elapsed_time_subsidy = @elapsed dfSubRevenue, dfRegSubRevenue = write_subsidy_revenue(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing subsidy is")
                 println(elapsed_time_subsidy)
             end
@@ -295,19 +294,18 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
             if output_settings_d["WriteESRPrices"] ||
                output_settings_d["WriteESRRevenue"] ||
                output_settings_d["WriteNetRevenue"]
-                elapsed_time_esr_prices =
-                    @elapsed dfESR = write_esr_prices(path, inputs, setup, EP)
+                elapsed_time_esr_prices = @elapsed dfESR = write_esr_prices(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing esr prices is")
                 println(elapsed_time_esr_prices)
             end
 
             if output_settings_d["WriteESRRevenue"] || output_settings_d["WriteNetRevenue"]
-                elapsed_time_esr_revenue = @elapsed dfESRRev =
-                    write_esr_revenue(path, inputs, setup, dfPower, dfESR, EP)
+                elapsed_time_esr_revenue = @elapsed dfESRRev = write_esr_revenue(
+                    path, inputs, setup, dfPower, dfESR, EP)
                 println("Time elapsed for writing esr revenue is")
                 println(elapsed_time_esr_revenue)
             end
-
         end
 
         dfResRevenue = DataFrame()
@@ -319,49 +317,48 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
             end
 
             if output_settings_d["WriteReserveMarginWithWeights"]
-                elapsed_time_rsv_margin_w =
-                    @elapsed write_reserve_margin_w(path, inputs, setup, EP)
+                elapsed_time_rsv_margin_w = @elapsed write_reserve_margin_w(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing reserve margin with weights is")
                 println(elapsed_time_rsv_margin_w)
             end
 
             if output_settings_d["WriteVirtualDischarge"]
-                elapsed_time_virtual_discharge =
-                    @elapsed write_virtual_discharge(path, inputs, setup, EP)
+                elapsed_time_virtual_discharge = @elapsed write_virtual_discharge(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing virtual discharge is")
                 println(elapsed_time_virtual_discharge)
             end
 
             if output_settings_d["WriteReserveMarginRevenue"] ||
                output_settings_d["WriteNetRevenue"]
-                elapsed_time_res_rev = @elapsed dfResRevenue =
-                    write_reserve_margin_revenue(path, inputs, setup, EP)
+                elapsed_time_res_rev = @elapsed dfResRevenue = write_reserve_margin_revenue(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing reserve revenue is")
                 println(elapsed_time_res_rev)
             end
 
             if haskey(inputs, "dfCapRes_slack") &&
                output_settings_d["WriteReserveMarginSlack"]
-                elapsed_time_rsv_slack =
-                    @elapsed write_reserve_margin_slack(path, inputs, setup, EP)
+                elapsed_time_rsv_slack = @elapsed write_reserve_margin_slack(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing reserve margin slack is")
                 println(elapsed_time_rsv_slack)
             end
 
             if output_settings_d["WriteCapacityValue"]
-                elapsed_time_cap_value =
-                    @elapsed write_capacity_value(path, inputs, setup, EP)
+                elapsed_time_cap_value = @elapsed write_capacity_value(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing capacity value is")
                 println(elapsed_time_cap_value)
             end
-
         end
 
         dfOpRegRevenue = DataFrame()
         dfOpRsvRevenue = DataFrame()
         if setup["OperationalReserves"] == 1 && has_duals(EP)
-            elapsed_time_op_res_rev = @elapsed dfOpRegRevenue, dfOpRsvRevenue =
-                write_operating_reserve_regulation_revenue(path, inputs, setup, EP)
+            elapsed_time_op_res_rev = @elapsed dfOpRegRevenue, dfOpRsvRevenue = write_operating_reserve_regulation_revenue(
+                path, inputs, setup, EP)
             println("Time elapsed for writing oerating reserve and regulation revenue is")
             println(elapsed_time_op_res_rev)
         end
@@ -374,8 +371,8 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
         if setup["MinCapReq"] == 1 &&
            has_duals(EP) == 1 &&
            output_settings_d["WriteMinCapReq"]
-            elapsed_time_min_cap_req =
-                @elapsed write_minimum_capacity_requirement(path, inputs, setup, EP)
+            elapsed_time_min_cap_req = @elapsed write_minimum_capacity_requirement(
+                path, inputs, setup, EP)
             println("Time elapsed for writing minimum capacity requirement is")
             println(elapsed_time_min_cap_req)
         end
@@ -383,23 +380,23 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
         if setup["MaxCapReq"] == 1 &&
            has_duals(EP) == 1 &&
            output_settings_d["WriteMaxCapReq"]
-            elapsed_time_max_cap_req =
-                @elapsed write_maximum_capacity_requirement(path, inputs, setup, EP)
+            elapsed_time_max_cap_req = @elapsed write_maximum_capacity_requirement(
+                path, inputs, setup, EP)
             println("Time elapsed for writing maximum capacity requirement is")
             println(elapsed_time_max_cap_req)
         end
 
         if !isempty(inputs["ELECTROLYZER"]) && has_duals(EP)
             if output_settings_d["WriteHydrogenPrices"]
-                elapsed_time_hydrogen_prices =
-                    @elapsed write_hydrogen_prices(path, inputs, setup, EP)
+                elapsed_time_hydrogen_prices = @elapsed write_hydrogen_prices(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing hydrogen prices is")
                 println(elapsed_time_hydrogen_prices)
             end
             if setup["HydrogenHourlyMatching"] == 1 &&
                output_settings_d["WriteHourlyMatchingPrices"]
-                elapsed_time_hourly_matching_prices =
-                    @elapsed write_hourly_matching_prices(path, inputs, setup, EP)
+                elapsed_time_hourly_matching_prices = @elapsed write_hourly_matching_prices(
+                    path, inputs, setup, EP)
                 println("Time elapsed for writing hourly matching prices is")
                 println(elapsed_time_hourly_matching_prices)
             end
@@ -421,7 +418,7 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
                 dfRegSubRevenue,
                 dfVreStor,
                 dfOpRegRevenue,
-                dfOpRsvRevenue,
+                dfOpRsvRevenue
             )
             println("Time elapsed for writing net revenue is")
             println(elapsed_time_net_rev)
@@ -432,7 +429,6 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
 
     return path
 end # END output()
-
 
 """
 	write_annual(fullpath::AbstractString, dfOut::DataFrame)
@@ -451,25 +447,24 @@ end
 Internal function for writing full time series outputs. This function wraps the instructions for creating the full time series output files. 
 """
 function write_fulltimeseries(
-    fullpath::AbstractString,
-    dataOut::Matrix{Float64},
-    dfOut::DataFrame,
+        fullpath::AbstractString,
+        dataOut::Matrix{Float64},
+        dfOut::DataFrame
 )
     T = size(dataOut, 2)
     dfOut = hcat(dfOut, DataFrame(dataOut, :auto))
-    auxNew_Names = [
-        Symbol("Resource")
-        Symbol("Zone")
-        Symbol("AnnualSum")
-        [Symbol("t$t") for t = 1:T]
-    ]
+    auxNew_Names = [Symbol("Resource")
+                    Symbol("Zone")
+                    Symbol("AnnualSum")
+                    [Symbol("t$t") for t in 1:T]]
     rename!(dfOut, auxNew_Names)
     total = DataFrame(["Total" 0 sum(dfOut[!, :AnnualSum]) fill(0.0, (1, T))], auxNew_Names)
-    total[!, 4:T+3] .= sum(dataOut, dims = 1)
+    total[!, 4:(T + 3)] .= sum(dataOut, dims = 1)
     dfOut = vcat(dfOut, total)
     CSV.write(fullpath, dftranspose(dfOut, false), writeheader = false)
     return nothing
 end
 
-write_settings_file(path, setup) =
+function write_settings_file(path, setup)
     YAML.write_file(joinpath(path, "run_settings.yml"), setup)
+end

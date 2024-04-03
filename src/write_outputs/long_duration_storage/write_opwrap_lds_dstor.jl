@@ -9,7 +9,7 @@ function write_opwrap_lds_dstor(path::AbstractString, inputs::Dict, setup::Dict,
     #Excess inventory of storage period built up during representative period w
     dfdStorage = DataFrame(Resource = inputs["RESOURCE_NAMES"], Zone = zones)
     dsoc = zeros(G, W)
-    for i = 1:G
+    for i in 1:G
         if i in inputs["STOR_LONG_DURATION"]
             dsoc[i, :] = value.(EP[:vdSOC])[i, :]
         end
@@ -24,11 +24,11 @@ function write_opwrap_lds_dstor(path::AbstractString, inputs::Dict, setup::Dict,
     end
 
     dfdStorage = hcat(dfdStorage, DataFrame(dsoc, :auto))
-    auxNew_Names = [Symbol("Resource"); Symbol("Zone"); [Symbol("w$t") for t = 1:W]]
+    auxNew_Names = [Symbol("Resource"); Symbol("Zone"); [Symbol("w$t") for t in 1:W]]
     rename!(dfdStorage, auxNew_Names)
     CSV.write(
         joinpath(path, "dStorage.csv"),
         dftranspose(dfdStorage, false),
-        header = false,
+        header = false
     )
 end

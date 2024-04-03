@@ -6,7 +6,6 @@ function infer_solver(optimizer::Any)
     return lowercase(string(parentmodule(optimizer)))
 end
 
-
 @doc raw"""
 	configure_solver(solver_settings_path::String, optimizer::Any)
 
@@ -30,7 +29,7 @@ function configure_solver(solver_settings_path::String, optimizer::Any)
         "cplex" => configure_cplex,
         "clp" => configure_clp,
         "cbc" => configure_cbc,
-        "scip" => configure_scip,
+        "scip" => configure_scip
     )
 
     return configure_functions[solver_name](path, optimizer)

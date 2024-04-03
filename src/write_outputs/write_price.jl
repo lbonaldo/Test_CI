@@ -14,14 +14,14 @@ function write_price(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
     price = locational_marginal_price(EP, inputs, setup)
     dfPrice = hcat(dfPrice, DataFrame(transpose(price), :auto))
 
-    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t = 1:T]]
+    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t in 1:T]]
     rename!(dfPrice, auxNew_Names)
 
     ## Linear configuration final output
     CSV.write(
         joinpath(path, "prices.csv"),
         dftranspose(dfPrice, false),
-        writeheader = false,
+        writeheader = false
     )
     return nothing
 end

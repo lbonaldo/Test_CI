@@ -37,24 +37,20 @@ function curtailable_variable_renewable!(EP::Model, inputs::Dict, setup::Dict)
 
     ## Power Balance Expressions ##
 
-    @expression(
-        EP,
+    @expression(EP,
         ePowerBalanceDisp[t = 1:T, z = 1:Z],
-        sum(EP[:vP][y, t] for y in intersect(VRE, resources_in_zone_by_rid(gen, z)))
-    )
+        sum(EP[:vP][y, t] for y in intersect(VRE, resources_in_zone_by_rid(gen, z))))
     add_similar_to_expression!(EP[:ePowerBalance], EP[:ePowerBalanceDisp])
 
     # Capacity Reserves Margin policy
     if CapacityReserveMargin > 0
-        @expression(
-            EP,
+        @expression(EP,
             eCapResMarBalanceVRE[res = 1:inputs["NCapacityReserveMargin"], t = 1:T],
             sum(
                 derating_factor(gen[y], tag = res) *
                 EP[:eTotalCap][y] *
                 inputs["pP_Max"][y, t] for y in VRE
-            )
-        )
+            ))
         add_similar_to_expression!(EP[:eCapResMarBalance], eCapResMarBalanceVRE)
     end
 
@@ -69,19 +65,18 @@ function curtailable_variable_renewable!(EP::Model, inputs::Dict, setup::Dict)
             # Define the set of generator indices corresponding to the different sites (or bins) of a particular VRE technology (E.g. wind or solar) in a particular zone.
             # For example the wind resource in a particular region could be include three types of bins corresponding to different sites with unique interconnection, hourly capacity factor and maximim available capacity limits.
             VRE_BINS = intersect(
-                resource_id.(gen[resource_id.(gen).>=y]),
-                resource_id.(gen[resource_id.(gen).<=y+num_vre_bins(gen[y])-1]),
+                resource_id.(gen[resource_id.(gen) .>= y]),
+                resource_id.(gen[resource_id.(gen) .<= y + num_vre_bins(gen[y]) - 1])
             )
 
             # Maximum power generated per hour by renewable generators must be less than
             # sum of product of hourly capacity factor for each bin times its the bin installed capacity
             # Note: inequality constraint allows curtailment of output below maximum level.
-            @constraint(
-                EP,
+            @constraint(EP,
                 [t = 1:T],
-                EP[:vP][y, t] <=
-                sum(inputs["pP_Max"][yy, t] * EP[:eTotalCap][yy] for yy in VRE_BINS)
-            )
+                EP[:vP][y,
+                    t]<=
+                sum(inputs["pP_Max"][yy, t] * EP[:eTotalCap][yy] for yy in VRE_BINS))
         end
     end
 
@@ -90,16 +85,14 @@ function curtailable_variable_renewable!(EP::Model, inputs::Dict, setup::Dict)
         fix.(EP[:vP][y, :], 0.0, force = true)
     end
     ##CO2 Polcy Module VRE Generation by zone
-    @expression(
-        EP,
+    @expression(EP,
         eGenerationByVRE[z = 1:Z, t = 1:T], # the unit is GW
         sum(
-            EP[:vP][y, t] for
-            y in intersect(inputs["VRE"], resources_in_zone_by_rid(gen, z))
-        )
-    )
+            EP[:vP][y, t]
+        for
+        y in intersect(inputs["VRE"], resources_in_zone_by_rid(gen, z))
+        ))
     add_similar_to_expression!(EP[:eGenerationByZone], eGenerationByVRE)
-
 end
 
 @doc raw"""
@@ -144,25 +137,21 @@ function curtailable_variable_renewable_operational_reserves!(EP::Model, inputs:
     resources_in_bin(y) = UnitRange(y, y + num_vre_bins(gen[y]) - 1)
     hourly_bin_capacity(y, t) = sum(hourly_capacity(yy, t) for yy in resources_in_bin(y))
 
-    @constraint(
-        EP,
+    @constraint(EP,
         [y in REG, t in 1:T],
-        vREG[y, t] <= reg_max(gen[y]) * hourly_bin_capacity(y, t)
-    )
-    @constraint(
-        EP,
+        vREG[y, t]<=reg_max(gen[y]) * hourly_bin_capacity(y, t))
+    @constraint(EP,
         [y in RSV, t in 1:T],
-        vRSV[y, t] <= rsv_max(gen[y]) * hourly_bin_capacity(y, t)
-    )
+        vRSV[y, t]<=rsv_max(gen[y]) * hourly_bin_capacity(y, t))
 
     expr = extract_time_series_to_expression(vP, VRE_POWER_OUT)
     add_similar_to_expression!(expr[REG, :], -vREG[REG, :])
-    @constraint(EP, [y in VRE_POWER_OUT, t in 1:T], expr[y, t] >= 0)
+    @constraint(EP, [y in VRE_POWER_OUT, t in 1:T], expr[y, t]>=0)
 
     expr = extract_time_series_to_expression(vP, VRE_POWER_OUT)
     add_similar_to_expression!(expr[REG, :], +vREG[REG, :])
     add_similar_to_expression!(expr[RSV, :], +vRSV[RSV, :])
-    @constraint(EP, [y in VRE_POWER_OUT, t in 1:T], expr[y, t] <= hourly_bin_capacity(y, t))
+    @constraint(EP, [y in VRE_POWER_OUT, t in 1:T], expr[y, t]<=hourly_bin_capacity(y, t))
 end
 
 function remove_operational_reserves_for_binned_vre_resources!(EP::Model, inputs::Dict)

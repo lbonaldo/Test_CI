@@ -17,25 +17,23 @@ function write_rsv(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
         unmet_vec = value.(EP[:vUNMET_RSV]) * scale_factor
         total_unmet = sum(unmet_vec)
         dfRsv = hcat(dfRsv, DataFrame(rsv, :auto))
-        auxNew_Names = [
-            Symbol("Resource")
-            Symbol("Zone")
-            Symbol("AnnualSum")
-            [Symbol("t$t") for t = 1:T]
-        ]
+        auxNew_Names = [Symbol("Resource")
+                        Symbol("Zone")
+                        Symbol("AnnualSum")
+                        [Symbol("t$t") for t in 1:T]]
         rename!(dfRsv, auxNew_Names)
 
         total = DataFrame(["Total" 0 sum(dfRsv.AnnualSum) zeros(1, T)], :auto)
         unmet = DataFrame(["unmet" 0 total_unmet zeros(1, T)], :auto)
-        total[!, 4:T+3] .= sum(rsv, dims = 1)
-        unmet[!, 4:T+3] .= transpose(unmet_vec)
+        total[!, 4:(T + 3)] .= sum(rsv, dims = 1)
+        unmet[!, 4:(T + 3)] .= transpose(unmet_vec)
         rename!(total, auxNew_Names)
         rename!(unmet, auxNew_Names)
         dfRsv = vcat(dfRsv, unmet, total)
         CSV.write(
             joinpath(path, "reg_dn.csv"),
             dftranspose(dfRsv, false),
-            writeheader = false,
+            writeheader = false
         )
     end
 end

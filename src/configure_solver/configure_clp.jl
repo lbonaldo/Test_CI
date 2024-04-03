@@ -21,11 +21,10 @@ The Clp optimizer instance is configured with the following default parameters i
 
 """
 function configure_clp(solver_settings_path::String, optimizer::Any)
-
     solver_settings = YAML.load(open(solver_settings_path))
-    solver_settings = convert(Dict{String,Any}, solver_settings)
+    solver_settings = convert(Dict{String, Any}, solver_settings)
 
-    default_settings = Dict{String,Any}(
+    default_settings = Dict{String, Any}(
         "Feasib_Tol" => 1e-7,
         "DualObjectiveLimit" => 1e308,
         "MaximumIterations" => 2147483647,
@@ -35,7 +34,7 @@ function configure_clp(solver_settings_path::String, optimizer::Any)
         "Method" => 5,
         "InfeasibleReturn" => 0,
         "Scaling" => 3,
-        "Perturbation" => 100,
+        "Perturbation" => 100
     )
 
     attributes = merge(default_settings, solver_settings)
@@ -44,7 +43,7 @@ function configure_clp(solver_settings_path::String, optimizer::Any)
         "Feasib_Tol" => "PrimalTolerance",
         "TimeLimit" => "MaximumSeconds",
         "Pre_Solve" => "PresolveType",
-        "Method" => "SolveType",
+        "Method" => "SolveType"
     )
 
     attributes = rename_keys(attributes, key_replacement)
@@ -53,6 +52,6 @@ function configure_clp(solver_settings_path::String, optimizer::Any)
     # Dual tolerances. It should probably be fixed.
     attributes["DualTolerance"] = attributes["PrimalTolerance"]
 
-    attributes::Dict{String,Any}
+    attributes::Dict{String, Any}
     return optimizer_with_attributes(optimizer, attributes...)
 end

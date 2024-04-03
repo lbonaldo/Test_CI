@@ -8,20 +8,19 @@
 Effective capacity in a capacity reserve margin zone for certain resources in the given timesteps.
 """
 function thermal_plant_effective_capacity(
-    EP,
-    inputs,
-    resources::Vector{Int},
-    capres_zone::Int,
-    timesteps::Vector{Int},
+        EP,
+        inputs,
+        resources::Vector{Int},
+        capres_zone::Int,
+        timesteps::Vector{Int}
 )::Matrix{Float64}
-    eff_cap =
-        thermal_plant_effective_capacity.(
-            Ref(EP),
-            Ref(inputs),
-            resources,
-            Ref(capres_zone),
-            Ref(timesteps),
-        )
+    eff_cap = thermal_plant_effective_capacity.(
+        Ref(EP),
+        Ref(inputs),
+        resources,
+        Ref(capres_zone),
+        Ref(timesteps)
+    )
     return reduce(hcat, eff_cap)
 end
 
@@ -32,11 +31,11 @@ function thermal_plant_effective_capacity(EP::Model, inputs::Dict, y, capres_zon
 end
 
 function thermal_plant_effective_capacity(
-    EP::Model,
-    inputs::Dict,
-    r_id::Int,
-    capres_zone::Int,
-    timesteps::Vector{Int},
+        EP::Model,
+        inputs::Dict,
+        r_id::Int,
+        capres_zone::Int,
+        timesteps::Vector{Int}
 )::Vector{Float64}
     y = r_id
     gen = inputs["RESOURCES"]
@@ -51,7 +50,7 @@ function thermal_plant_effective_capacity(
             inputs,
             y,
             capres_zone,
-            timesteps,
+            timesteps
         )
         effective_capacity = effective_capacity .+ value.(adjustment)
     end

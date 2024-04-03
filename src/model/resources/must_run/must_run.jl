@@ -13,7 +13,6 @@ For must-run resources ($y\in \mathcal{MR}$) output in each time period $t$ must
 ```
 """
 function must_run!(EP::Model, inputs::Dict, setup::Dict)
-
     println("Must-Run Resources Module")
 
     gen = inputs["RESOURCES"]
@@ -29,40 +28,31 @@ function must_run!(EP::Model, inputs::Dict, setup::Dict)
 
     ## Power Balance Expressions ##
 
-    @expression(
-        EP,
+    @expression(EP,
         ePowerBalanceNdisp[t = 1:T, z = 1:Z],
-        sum(EP[:vP][y, t] for y in intersect(MUST_RUN, resources_in_zone_by_rid(gen, z)))
-    )
+        sum(EP[:vP][y, t] for y in intersect(MUST_RUN, resources_in_zone_by_rid(gen, z))))
     add_similar_to_expression!(EP[:ePowerBalance], ePowerBalanceNdisp)
 
     # Capacity Reserves Margin policy
     if CapacityReserveMargin > 0
-        @expression(
-            EP,
+        @expression(EP,
             eCapResMarBalanceMustRun[res = 1:inputs["NCapacityReserveMargin"], t = 1:T],
             sum(
                 derating_factor(gen[y], tag = res) *
                 EP[:eTotalCap][y] *
                 inputs["pP_Max"][y, t] for y in MUST_RUN
-            )
-        )
+            ))
         add_similar_to_expression!(EP[:eCapResMarBalance], eCapResMarBalanceMustRun)
     end
 
     ### Constratints ###
 
-    @constraint(
-        EP,
+    @constraint(EP,
         [y in MUST_RUN, t = 1:T],
-        EP[:vP][y, t] == inputs["pP_Max"][y, t] * EP[:eTotalCap][y]
-    )
+        EP[:vP][y, t]==inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
     ##CO2 Polcy Module Must Run Generation by zone
-    @expression(
-        EP,
+    @expression(EP,
         eGenerationByMustRun[z = 1:Z, t = 1:T], # the unit is GW
-        sum(EP[:vP][y, t] for y in intersect(MUST_RUN, resources_in_zone_by_rid(gen, z)))
-    )
+        sum(EP[:vP][y, t] for y in intersect(MUST_RUN, resources_in_zone_by_rid(gen, z))))
     add_similar_to_expression!(EP[:eGenerationByZone], eGenerationByMustRun)
-
 end

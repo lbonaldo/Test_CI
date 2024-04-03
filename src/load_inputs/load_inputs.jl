@@ -77,8 +77,8 @@ function load_inputs(setup::Dict, path::AbstractString)
 
     # Virtual charge discharge cost
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
-    inputs["VirtualChargeDischargeCost"] =
-        setup["VirtualChargeDischargeCost"] / scale_factor
+    inputs["VirtualChargeDischargeCost"] = setup["VirtualChargeDischargeCost"] /
+                                           scale_factor
 
     println("CSV Files Successfully Read In From $path")
 
@@ -117,9 +117,9 @@ Returns:
 - String: The directory path based on the setup parameters.
 """
 function get_systemfiles_path(
-    setup::Dict,
-    TDR_directory::AbstractString,
-    path::AbstractString,
+        setup::Dict,
+        TDR_directory::AbstractString,
+        path::AbstractString
 )
     if setup["TimeDomainReduction"] == 1 && time_domain_reduced_files_exist(TDR_directory)
         return TDR_directory

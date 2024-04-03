@@ -78,9 +78,8 @@ The optimizer instance is configured with the following default parameters if a 
 Any other attributes in the settings file (which typically start with `CPX_PARAM_`) will also be passed to the solver.
 """
 function configure_cplex(solver_settings_path::String, optimizer::Any)
-
     solver_settings = YAML.load(open(solver_settings_path))
-    solver_settings = convert(Dict{String,Any}, solver_settings)
+    solver_settings = convert(Dict{String, Any}, solver_settings)
 
     default_settings = Dict(
         "Feasib_Tol" => 1e-6,
@@ -93,9 +92,8 @@ function configure_cplex(solver_settings_path::String, optimizer::Any)
         "BarConvTol" => 1e-8,
         "NumericFocus" => 0,
         "BarObjRng" => 1e+75,
-        "SolutionType" => 2,
+        "SolutionType" => 2
     )
-
 
     attributes = merge(default_settings, solver_settings)
 
@@ -111,10 +109,10 @@ function configure_cplex(solver_settings_path::String, optimizer::Any)
         "BarConvTol" => "CPX_PARAM_BAREPCOMP",
         "NumericFocus" => "CPX_PARAM_NUMERICALEMPHASIS",
         "BarObjRng" => "CPX_PARAM_BAROBJRNG",
-        "SolutionType" => "CPX_PARAM_SOLUTIONTYPE",
+        "SolutionType" => "CPX_PARAM_SOLUTIONTYPE"
     )
     attributes = rename_keys(attributes, key_replacement)
 
-    attributes::Dict{String,Any}
+    attributes::Dict{String, Any}
     return optimizer_with_attributes(optimizer, attributes...)
 end

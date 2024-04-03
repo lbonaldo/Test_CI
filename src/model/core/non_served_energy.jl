@@ -52,7 +52,6 @@ Additionally, total demand curtailed in each time step cannot exceed total deman
 ```
 """
 function non_served_energy!(EP::Model, inputs::Dict, setup::Dict)
-
     println("Non-served Energy Module")
 
     T = inputs["T"]     # Number of time steps
@@ -62,30 +61,28 @@ function non_served_energy!(EP::Model, inputs::Dict, setup::Dict)
     ### Variables ###
 
     # Non-served energy/curtailed demand in the segment "s" at hour "t" in zone "z"
-    @variable(EP, vNSE[s = 1:SEG, t = 1:T, z = 1:Z] >= 0)
+    @variable(EP, vNSE[s = 1:SEG, t = 1:T, z = 1:Z]>=0)
 
     ### Expressions ###
 
     ## Objective Function Expressions ##
 
     # Cost of non-served energy/curtailed demand at hour "t" in zone "z"
-    @expression(
-        EP,
+    @expression(EP,
         eCNSE[s = 1:SEG, t = 1:T, z = 1:Z],
-        (inputs["omega"][t] * inputs["pC_D_Curtail"][s] * vNSE[s, t, z])
-    )
+        (inputs["omega"][t]*inputs["pC_D_Curtail"][s]*vNSE[s, t, z]))
 
     # Sum individual demand segment contributions to non-served energy costs to get total non-served energy costs
     # Julia is fastest when summing over one row one column at a time
-    @expression(EP, eTotalCNSETS[t = 1:T, z = 1:Z], sum(eCNSE[s, t, z] for s = 1:SEG))
-    @expression(EP, eTotalCNSET[t = 1:T], sum(eTotalCNSETS[t, z] for z = 1:Z))
-    @expression(EP, eTotalCNSE, sum(eTotalCNSET[t] for t = 1:T))
+    @expression(EP, eTotalCNSETS[t = 1:T, z = 1:Z], sum(eCNSE[s, t, z] for s in 1:SEG))
+    @expression(EP, eTotalCNSET[t = 1:T], sum(eTotalCNSETS[t, z] for z in 1:Z))
+    @expression(EP, eTotalCNSE, sum(eTotalCNSET[t] for t in 1:T))
 
     # Add total cost contribution of non-served energy/curtailed demand to the objective function
     add_to_expression!(EP[:eObj], eTotalCNSE)
 
     ## Power Balance Expressions ##
-    @expression(EP, ePowerBalanceNse[t = 1:T, z = 1:Z], sum(vNSE[s, t, z] for s = 1:SEG))
+    @expression(EP, ePowerBalanceNse[t = 1:T, z = 1:Z], sum(vNSE[s, t, z] for s in 1:SEG))
 
     # Add non-served energy/curtailed demand contribution to power balance expression
     add_similar_to_expression!(EP[:ePowerBalance], ePowerBalanceNse)
@@ -93,14 +90,13 @@ function non_served_energy!(EP::Model, inputs::Dict, setup::Dict)
     # Capacity Reserves Margin policy
     if setup["CapacityReserveMargin"] > 0
         if SEG >= 2
-            @expression(
-                EP,
+            @expression(EP,
                 eCapResMarBalanceNSE[res = 1:inputs["NCapacityReserveMargin"], t = 1:T],
                 sum(
-                    EP[:vNSE][s, t, z] for s = 2:SEG,
-                    z in findall(x -> x != 0, inputs["dfCapRes"][:, res])
-                )
-            )
+                    EP[:vNSE][s, t, z]
+                for s in 2:SEG,
+                z in findall(x -> x != 0, inputs["dfCapRes"][:, res])
+                ))
             add_similar_to_expression!(EP[:eCapResMarBalance], eCapResMarBalanceNSE)
         end
     end
@@ -108,17 +104,12 @@ function non_served_energy!(EP::Model, inputs::Dict, setup::Dict)
     ### Constratints ###
 
     # Demand curtailed in each segment of curtailable demands cannot exceed maximum allowable share of demand
-    @constraint(
-        EP,
+    @constraint(EP,
         cNSEPerSeg[s = 1:SEG, t = 1:T, z = 1:Z],
-        vNSE[s, t, z] <= inputs["pMax_D_Curtail"][s] * inputs["pD"][t, z]
-    )
+        vNSE[s, t, z]<=inputs["pMax_D_Curtail"][s] * inputs["pD"][t, z])
 
     # Total demand curtailed in each time step (hourly) cannot exceed total demand
-    @constraint(
-        EP,
+    @constraint(EP,
         cMaxNSE[t = 1:T, z = 1:Z],
-        sum(vNSE[s, t, z] for s = 1:SEG) <= inputs["pD"][t, z]
-    )
-
+        sum(vNSE[s, t, z] for s in 1:SEG)<=inputs["pD"][t, z])
 end

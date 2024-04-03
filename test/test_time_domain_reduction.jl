@@ -1,6 +1,5 @@
 module TestTDR
 
-
 import GenX
 import Test
 import JLD2, Clustering
@@ -35,7 +34,7 @@ genx_setup = Dict(
     "MinCapReq" => 1,
     "MaxCapReq" => 1,
     "EnergyShareRequirement" => 1,
-    "CO2Cap" => 2,
+    "CO2Cap" => 2
 )
 
 settings = GenX.default_settings()
@@ -46,8 +45,7 @@ clustering_test = with_logger(ConsoleLogger(stderr, Logging.Warn)) do
 end
 
 # Load true clustering
-clustering_true =
-    JLD2.load(joinpath(TDR_Results_true, "clusters_true.jld2"))["ClusterObject"]
+clustering_true = JLD2.load(joinpath(TDR_Results_true, "clusters_true.jld2"))["ClusterObject"]
 
 # Clustering validation
 R = Clustering.randindex(clustering_test, clustering_true)

@@ -23,7 +23,6 @@ The total cost of start-ups across all generators subject to unit commitment ($y
 The sum of start-up costs is added to the objective function.
 """
 function ucommit!(EP::Model, inputs::Dict, setup::Dict)
-
     println("Unit Commitment Module")
 
     T = inputs["T"]     # Number of time steps (hours)
@@ -33,26 +32,24 @@ function ucommit!(EP::Model, inputs::Dict, setup::Dict)
 
     ## Decision variables for unit commitment
     # commitment state variable
-    @variable(EP, vCOMMIT[y in COMMIT, t = 1:T] >= 0)
+    @variable(EP, vCOMMIT[y in COMMIT, t = 1:T]>=0)
     # startup event variable
-    @variable(EP, vSTART[y in COMMIT, t = 1:T] >= 0)
+    @variable(EP, vSTART[y in COMMIT, t = 1:T]>=0)
     # shutdown event variable
-    @variable(EP, vSHUT[y in COMMIT, t = 1:T] >= 0)
+    @variable(EP, vSHUT[y in COMMIT, t = 1:T]>=0)
 
     ### Expressions ###
 
     ## Objective Function Expressions ##
 
     # Startup costs of "generation" for resource "y" during hour "t"
-    @expression(
-        EP,
+    @expression(EP,
         eCStart[y in COMMIT, t = 1:T],
-        (inputs["omega"][t] * inputs["C_Start"][y, t] * vSTART[y, t])
-    )
+        (inputs["omega"][t]*inputs["C_Start"][y, t]*vSTART[y, t]))
 
     # Julia is fastest when summing over one row one column at a time
     @expression(EP, eTotalCStartT[t = 1:T], sum(eCStart[y, t] for y in COMMIT))
-    @expression(EP, eTotalCStart, sum(eTotalCStartT[t] for t = 1:T))
+    @expression(EP, eTotalCStart, sum(eTotalCStartT[t] for t in 1:T))
 
     add_to_expression!(EP[:eObj], eTotalCStart)
 

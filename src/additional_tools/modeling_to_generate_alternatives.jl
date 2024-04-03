@@ -19,7 +19,6 @@ To create the MGA formulation, we replace the cost-minimizing objective function
 where, $\beta_{zr}$ is a random objective fucntion coefficient betwen $[0,100]$ for MGA iteration $k$. $\Theta_{y,t,z,r}$ is a generation of technology $y$ in zone $z$ in time period $t$ that belongs to a resource type $r$. We aggregate $\Theta_{y,t,z,r}$ into a new variable $P_{z,r}$ that represents total generation from technology type $r$ in a zone $z$. In the second constraint above, $\delta$ denote the increase in budget from the least-cost solution and $f$ represents the expression for the total system cost. The constraint $Ax = b$ represents all other constraints in the power system model. We then solve the formulation with minimization and maximization objective function to explore near optimal solution space.
 """
 function mga(EP::Model, path::AbstractString, setup::Dict, inputs::Dict)
-
     if setup["ModelingToGenerateAlternatives"] == 1
         # Start MGA Algorithm
         println("MGA Module")
@@ -42,29 +41,29 @@ function mga(EP::Model, path::AbstractString, setup::Dict, inputs::Dict)
 
         ### Variables ###
 
-        @variable(EP, vSumvP[TechTypes = 1:length(TechTypes), z = 1:Z] >= 0) # Variable denoting total generation from eligible technology of a given type
+        @variable(EP, vSumvP[TechTypes = 1:length(TechTypes), z = 1:Z]>=0) # Variable denoting total generation from eligible technology of a given type
 
         ### End Variables ###
 
         ### Constraints ###
 
         # Constraint to set budget for MGA iterations
-        @constraint(EP, budget, EP[:eObj] <= Least_System_Cost * (1 + slack))
+        @constraint(EP, budget, EP[:eObj]<=Least_System_Cost * (1 + slack))
 
         # Constraint to compute total generation in each zone from a given Technology Type
         function resource_in_zone_with_TechType(tt::Int64, z::Int64)
-            condition::BitVector =
-                (resource_type_mga.(gen) .== TechTypes[tt]) .& (zone_id.(gen) .== z)
+            condition::BitVector = (resource_type_mga.(gen) .== TechTypes[tt]) .&
+                                   (zone_id.(gen) .== z)
             return resource_id.(gen[condition])
         end
-        @constraint(
-            EP,
+        @constraint(EP,
             cGeneration[tt = 1:length(TechTypes), z = 1:Z],
-            vSumvP[tt, z] == sum(
-                EP[:vP][y, t] * inputs["omega"][t] for
-                y in resource_in_zone_with_TechType(tt, z), t = 1:T
-            )
-        )
+            vSumvP[tt,
+                z]==sum(
+                EP[:vP][y, t] * inputs["omega"][t]
+            for
+            y in resource_in_zone_with_TechType(tt, z), t in 1:T
+            ))
 
         ### End Constraints ###
 
@@ -83,17 +82,15 @@ function mga(EP::Model, path::AbstractString, setup::Dict, inputs::Dict)
 
         print("Starting the first MGA iteration")
 
-        for i = 1:setup["ModelingToGenerateAlternativeIterations"]
+        for i in 1:setup["ModelingToGenerateAlternativeIterations"]
 
             # Create random coefficients for the generators that we want to include in the MGA run for the given budget
             pRand = rand(length(TechTypes), length(zones))
 
             ### Maximization objective
-            @objective(
-                EP,
+            @objective(EP,
                 Max,
-                sum(pRand[tt, z] * vSumvP[tt, z] for tt = 1:length(TechTypes), z = 1:Z)
-            )
+                sum(pRand[tt, z] * vSumvP[tt, z] for tt in 1:length(TechTypes), z in 1:Z))
 
             # Solve Model Iteration
             status = optimize!(EP)
@@ -105,11 +102,9 @@ function mga(EP::Model, path::AbstractString, setup::Dict, inputs::Dict)
             write_outputs(EP, mgaoutpath_max, setup, inputs)
 
             ### Minimization objective
-            @objective(
-                EP,
+            @objective(EP,
                 Min,
-                sum(pRand[tt, z] * vSumvP[tt, z] for tt = 1:length(TechTypes), z = 1:Z)
-            )
+                sum(pRand[tt, z] * vSumvP[tt, z] for tt in 1:length(TechTypes), z in 1:Z))
 
             # Solve Model Iteration
             status = optimize!(EP)
@@ -119,11 +114,9 @@ function mga(EP::Model, path::AbstractString, setup::Dict, inputs::Dict)
 
             # Write results
             write_outputs(EP, mgaoutpath_min, setup, inputs)
-
         end
 
         total_time = time() - mga_start_time
         ### End MGA Iterations ###
     end
-
 end

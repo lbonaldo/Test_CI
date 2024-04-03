@@ -21,7 +21,6 @@ function load_co2_cap!(setup::Dict, path::AbstractString, inputs::Dict)
     inputs["dfCO2CapZones"] = mat
     inputs["NCO2Cap"] = size(mat, 2)
 
-
     # Emission limits
     if setup["CO2Cap"] == 1
         #  CO2 emissions cap in mass

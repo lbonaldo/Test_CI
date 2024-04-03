@@ -68,7 +68,6 @@ The power balance constraint of the model ensures that electricity demand is met
 - `Model`: The model object containing the entire optimization problem model to be solved by solve_model.jl
 """
 function generate_model(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWithAttributes)
-
     T = inputs["T"]     # Number of time steps (hours)
     Z = inputs["Z"]     # Number of zones
 
@@ -80,7 +79,7 @@ function generate_model(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWithA
     set_string_names_on_creation(EP, Bool(setup["EnableJuMPStringNames"]))
     # Introduce dummy variable fixed to zero to ensure that expressions like eTotalCap,
     # eTotalCapCharge, eTotalCapEnergy and eAvail_Trans_Cap all have a JuMP variable
-    @variable(EP, vZERO == 0)
+    @variable(EP, vZERO==0)
 
     # Initialize Power Balance Expression
     # Expression for "baseline" power balance constraint
@@ -99,7 +98,7 @@ function generate_model(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWithA
         create_empty_expression!(
             EP,
             :eCapResMarBalance,
-            (inputs["NCapacityReserveMargin"], T),
+            (inputs["NCapacityReserveMargin"], T)
         )
     end
 
@@ -234,11 +233,9 @@ function generate_model(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWithA
     ## Power balance constraints
     # demand = generation + storage discharge - storage charge - demand deferral + deferred demand satisfaction - demand curtailment (NSE)
     #          + incoming power flows - outgoing power flows - flow losses - charge of heat storage + generation from NACC
-    @constraint(
-        EP,
+    @constraint(EP,
         cPowerBalance[t = 1:T, z = 1:Z],
-        EP[:ePowerBalance][t, z] == inputs["pD"][t, z]
-    )
+        EP[:ePowerBalance][t, z]==inputs["pD"][t, z])
 
     ## Record pre-solver time
     presolver_time = time() - presolver_start_time

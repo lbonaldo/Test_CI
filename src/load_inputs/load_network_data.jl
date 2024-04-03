@@ -4,7 +4,6 @@
 Function for reading input parameters related to the electricity transmission network
 """
 function load_network_data!(setup::Dict, path::AbstractString, inputs_nw::Dict)
-
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
 
     filename = "Network.csv"
@@ -39,9 +38,7 @@ function load_network_data!(setup::Dict, path::AbstractString, inputs_nw::Dict)
     ## Inputs for the DC-OPF 
     if setup["DC_OPF"] == 1
         if setup["NetworkExpansion"] == 1
-            @warn(
-                "Because the DC_OPF flag is active, GenX will not allow any transmission capacity expansion. Set the DC_OPF flag to 0 if you want to optimize tranmission capacity expansion."
-            )
+            @warn("Because the DC_OPF flag is active, GenX will not allow any transmission capacity expansion. Set the DC_OPF flag to 0 if you want to optimize tranmission capacity expansion.")
             setup["NetworkExpansion"] = 0
         end
         println("Reading DC-OPF values...")
@@ -53,8 +50,8 @@ function load_network_data!(setup::Dict, path::AbstractString, inputs_nw::Dict)
         inputs_nw["Line_Angle_Limit"] = to_floats(:Angle_Limit_Rad)
         # DC-OPF coefficient for each line (in MW when not scaled, in GW when scaled) 
         # MW = (kV)^2/Ohms 
-        inputs_nw["pDC_OPF_coeff"] =
-            ((line_voltage_kV .^ 2) ./ line_reactance_Ohms) / scale_factor
+        inputs_nw["pDC_OPF_coeff"] = ((line_voltage_kV .^ 2) ./ line_reactance_Ohms) /
+                                     scale_factor
     end
 
     # Maximum possible flow after reinforcement for use in linear segments of piecewise approximation
@@ -62,12 +59,12 @@ function load_network_data!(setup::Dict, path::AbstractString, inputs_nw::Dict)
 
     if setup["NetworkExpansion"] == 1
         # Read between zone network reinforcement costs per peak MW of capacity added
-        inputs_nw["pC_Line_Reinforcement"] =
-            to_floats(:Line_Reinforcement_Cost_per_MWyr) / scale_factor # convert to million $/GW/yr with objective function in millions
+        inputs_nw["pC_Line_Reinforcement"] = to_floats(:Line_Reinforcement_Cost_per_MWyr) /
+                                             scale_factor # convert to million $/GW/yr with objective function in millions
         # Maximum reinforcement allowed in MW
         #NOTE: values <0 indicate no expansion possible
-        inputs_nw["pMax_Line_Reinforcement"] =
-            map(x -> max(0, x), to_floats(:Line_Max_Reinforcement_MW)) / scale_factor # convert to GW
+        inputs_nw["pMax_Line_Reinforcement"] = map(
+            x -> max(0, x), to_floats(:Line_Max_Reinforcement_MW)) / scale_factor # convert to GW
         inputs_nw["pTrans_Max_Possible"] += inputs_nw["pMax_Line_Reinforcement"]
     end
 
@@ -80,8 +77,8 @@ function load_network_data!(setup::Dict, path::AbstractString, inputs_nw::Dict)
         end
 
         # Max Flow Possible on Each Line
-        inputs_nw["pLine_Max_Flow_Possible_MW"] =
-            to_floats(:Line_Max_Flow_Possible_MW) / scale_factor # Convert to GW
+        inputs_nw["pLine_Max_Flow_Possible_MW"] = to_floats(:Line_Max_Flow_Possible_MW) /
+                                                  scale_factor # Convert to GW
     end
 
     # Transmission line (between zone) loss coefficient (resistance/voltage^2)
@@ -90,8 +87,8 @@ function load_network_data!(setup::Dict, path::AbstractString, inputs_nw::Dict)
         inputs_nw["pTrans_Loss_Coef"] = inputs_nw["pPercent_Loss"]
     elseif setup["Trans_Loss_Segments"] >= 2
         # If zones are connected, loss coefficient is R/V^2 where R is resistance in Ohms and V is voltage in Volts
-        inputs_nw["pTrans_Loss_Coef"] =
-            (inputs_nw["Ohms"] / 10^6) ./ (inputs_nw["kV"] / 10^3)^2 * scale_factor # 1/GW ***
+        inputs_nw["pTrans_Loss_Coef"] = (inputs_nw["Ohms"] / 10^6) ./
+                                        (inputs_nw["kV"] / 10^3)^2 * scale_factor # 1/GW ***
     end
 
     ## Sets and indices for transmission losses and expansion
@@ -124,7 +121,7 @@ function load_network_map_from_list(network_var::DataFrame, Z, L, list_columns)
     mat = zeros(L, Z)
     start_zones = collect(skipmissing(network_var[!, start_col]))
     end_zones = collect(skipmissing(network_var[!, end_col]))
-    for l = 1:L
+    for l in 1:L
         mat[l, start_zones[l]] = 1
         mat[l, end_zones[l]] = -1
     end
@@ -147,7 +144,7 @@ function load_network_map_from_matrix(network_var::DataFrame, Z, L)
     # Topology of the network source-sink matrix
     network_map_matrix_format_deprecation_warning()
     col = findall(s -> s == "z1", names(network_var))[1]
-    mat = Matrix{Float64}(network_var[1:L, col:col+Z-1])
+    mat = Matrix{Float64}(network_var[1:L, col:(col + Z - 1)])
 end
 
 function load_network_map(network_var::DataFrame, Z, L)
@@ -156,7 +153,7 @@ function load_network_map(network_var::DataFrame, Z, L)
     list_columns = ["Start_Zone", "End_Zone"]
     has_network_list = all([c in columns for c in list_columns])
 
-    zones_as_strings = ["z" * string(i) for i = 1:Z]
+    zones_as_strings = ["z" * string(i) for i in 1:Z]
     has_network_matrix = all([c in columns for c in zones_as_strings])
 
     instructions = """The transmission network should be specified in the form of a matrix
@@ -182,5 +179,5 @@ function network_map_matrix_format_deprecation_warning()
                    1,          1,        2,
                    2,          1,        3,
                    3,          2,        3,
-  """ maxlog = 1
+  """ maxlog=1
 end

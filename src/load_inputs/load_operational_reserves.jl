@@ -22,7 +22,7 @@ function load_operational_reserves!(setup::Dict, path::AbstractString, inputs::D
                 Base.depwarn(
                     "The column name $col in file $filename is deprecated; prefer $best",
                     :load_operational_reserves,
-                    force = true,
+                    force = true
                 )
                 return float(df[firstrow, col])
             end
@@ -33,7 +33,7 @@ function load_operational_reserves!(setup::Dict, path::AbstractString, inputs::D
     # Regulation requirement as a percent of hourly demand; here demand is the total across all model zones
     inputs["pReg_Req_Demand"] = load_field_with_deprecated_symbol(
         res_in,
-        [:Reg_Req_Percent_Demand, :Reg_Req_Percent_Load],
+        [:Reg_Req_Percent_Demand, :Reg_Req_Percent_Load]
     )
 
     # Regulation requirement as a percent of hourly wind and solar generation (summed across all model zones)
@@ -41,7 +41,7 @@ function load_operational_reserves!(setup::Dict, path::AbstractString, inputs::D
     # Spinning up reserve requirement as a percent of hourly demand (which is summed across all zones)
     inputs["pRsv_Req_Demand"] = load_field_with_deprecated_symbol(
         res_in,
-        [:Rsv_Req_Percent_Demand, :Rsv_Req_Percent_Load],
+        [:Rsv_Req_Percent_Demand, :Rsv_Req_Percent_Load]
     )
     # Spinning up reserve requirement as a percent of hourly wind and solar generation (which is summed across all zones)
     inputs["pRsv_Req_VRE"] = float(res_in[1, :Rsv_Req_Percent_VRE])
@@ -49,8 +49,8 @@ function load_operational_reserves!(setup::Dict, path::AbstractString, inputs::D
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
 
     # Penalty for not meeting hourly spinning reserve requirement
-    inputs["pC_Rsv_Penalty"] =
-        float(res_in[1, :Unmet_Rsv_Penalty_Dollar_per_MW]) / scale_factor # convert to million $/GW with objective function in millions
+    inputs["pC_Rsv_Penalty"] = float(res_in[1, :Unmet_Rsv_Penalty_Dollar_per_MW]) /
+                               scale_factor # convert to million $/GW with objective function in millions
     inputs["pStatic_Contingency"] = float(res_in[1, :Static_Contingency_MW]) / scale_factor # convert to GW
 
     if setup["UCommit"] >= 1

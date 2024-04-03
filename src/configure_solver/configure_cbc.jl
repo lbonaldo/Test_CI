@@ -17,9 +17,8 @@ The Cbc optimizer instance is configured with the following default parameters i
 
 """
 function configure_cbc(solver_settings_path::String, optimizer::Any)
-
     solver_settings = YAML.load(open(solver_settings_path))
-    solver_settings = convert(Dict{String,Any}, solver_settings)
+    solver_settings = convert(Dict{String, Any}, solver_settings)
 
     default_settings = Dict(
         "TimeLimit" => 1e-6,
@@ -28,7 +27,7 @@ function configure_cbc(solver_settings_path::String, optimizer::Any)
         "maxNodes" => -1,
         "allowableGap" => -1,
         "ratioGap" => Inf,
-        "threads" => 1,
+        "threads" => 1
     )
 
     attributes = merge(default_settings, solver_settings)
@@ -37,6 +36,6 @@ function configure_cbc(solver_settings_path::String, optimizer::Any)
 
     attributes = rename_keys(attributes, key_replacement)
 
-    attributes::Dict{String,Any}
+    attributes::Dict{String, Any}
     return optimizer_with_attributes(optimizer, attributes...)
 end

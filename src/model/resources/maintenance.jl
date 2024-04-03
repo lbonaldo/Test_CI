@@ -12,7 +12,7 @@ const MAINTENANCE_SHUT_VARS = "MaintenanceShutVariables"
 """
 function resources_with_maintenance(df::DataFrame)::Vector{Int}
     if "MAINT" in names(df)
-        df[df.MAINT.>0, :R_ID]
+        df[df.MAINT .> 0, :R_ID]
     else
         Vector{Int}[]
     end
@@ -59,12 +59,12 @@ end
     maintenance_begin_hours: collection of hours in which maintenance is allowed to start
 """
 function controlling_maintenance_start_hours(
-    p::Int,
-    t::Int,
-    maintenance_duration::Int,
-    maintenance_begin_hours,
+        p::Int,
+        t::Int,
+        maintenance_duration::Int,
+        maintenance_begin_hours
 )
-    controlled_hours = hoursbefore(p, t, 0:(maintenance_duration-1))
+    controlled_hours = hoursbefore(p, t, 0:(maintenance_duration - 1))
     return intersect(controlled_hours, maintenance_begin_hours)
 end
 
@@ -104,19 +104,18 @@ end
     Adds constraints which act on the vCOMMIT-like variable.
 """
 function maintenance_formulation!(
-    EP::Model,
-    inputs::Dict,
-    resource_component::AbstractString,
-    r_id::Int,
-    maint_begin_cadence::Int,
-    maint_dur::Int,
-    maint_freq_years::Int,
-    cap::Float64,
-    vcommit::Symbol,
-    ecap::Symbol,
-    integer_operational_unit_commitment::Bool,
+        EP::Model,
+        inputs::Dict,
+        resource_component::AbstractString,
+        r_id::Int,
+        maint_begin_cadence::Int,
+        maint_dur::Int,
+        maint_freq_years::Int,
+        cap::Float64,
+        vcommit::Symbol,
+        ecap::Symbol,
+        integer_operational_unit_commitment::Bool
 )
-
     T = 1:inputs["T"]
     hours_per_subperiod = inputs["hours_per_subperiod"]
 
@@ -132,14 +131,11 @@ function maintenance_formulation!(
     maintenance_begin_hours = 1:maint_begin_cadence:T[end]
 
     # create variables
-    vMDOWN = EP[down] = @variable(EP, [t in T], base_name = down_name, lower_bound = 0)
-    vMSHUT =
-        EP[shut] = @variable(
-            EP,
-            [t in maintenance_begin_hours],
-            base_name = shut_name,
-            lower_bound = 0
-        )
+    vMDOWN = EP[down] = @variable(EP, [t in T], base_name=down_name, lower_bound=0)
+    vMSHUT = EP[shut] = @variable(EP,
+        [t in maintenance_begin_hours],
+        base_name=shut_name,
+        lower_bound=0)
 
     if integer_operational_unit_commitment
         set_integer.(vMDOWN)
@@ -155,22 +151,22 @@ function maintenance_formulation!(
     end)
 
     # Plant is non-committed during maintenance
-    @constraint(EP, [t in T], vMDOWN[t] + vcommit[y, t] <= ecap[y] / cap)
+    @constraint(EP, [t in T], vMDOWN[t] + vcommit[y, t]<=ecap[y] / cap)
 
-    controlling_hours(t) = controlling_maintenance_start_hours(
-        hours_per_subperiod,
-        t,
-        maint_dur,
-        maintenance_begin_hours,
-    )
+    function controlling_hours(t)
+        controlling_maintenance_start_hours(
+            hours_per_subperiod,
+            t,
+            maint_dur,
+            maintenance_begin_hours
+        )
+    end
     # Plant is down for the required number of hours
-    @constraint(EP, [t in T], vMDOWN[t] == sum(vMSHUT[controlling_hours(t)]))
+    @constraint(EP, [t in T], vMDOWN[t]==sum(vMSHUT[controlling_hours(t)]))
 
     # Plant requires maintenance every (certain number of) year(s)
-    @constraint(
-        EP,
-        sum(vMSHUT[t] for t in maintenance_begin_hours) >= ecap[y] / cap / maint_freq_years
-    )
+    @constraint(EP,
+        sum(vMSHUT[t] for t in maintenance_begin_hours)>=ecap[y] / cap / maint_freq_years)
 
     return
 end

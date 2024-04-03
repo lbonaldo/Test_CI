@@ -18,16 +18,15 @@ function write_energy_revenue(path::AbstractString, inputs::Dict, setup::Dict, E
         Resource = inputs["RESOURCE_NAMES"],
         Zone = zones,
         Cluster = clusters,
-        AnnualSum = Array{Float64}(undef, G),
+        AnnualSum = Array{Float64}(undef, G)
     )
     energyrevenue = zeros(G, T)
     price = locational_marginal_price(EP, inputs, setup)
-    energyrevenue[NONFLEX, :] =
-        value.(EP[:vP][NONFLEX, :]) .* transpose(price)[zone_id.(gen[NONFLEX]), :]
+    energyrevenue[NONFLEX, :] = value.(EP[:vP][NONFLEX, :]) .*
+                                transpose(price)[zone_id.(gen[NONFLEX]), :]
     if !isempty(FLEX)
-        energyrevenue[FLEX, :] =
-            value.(EP[:vCHARGE_FLEX][FLEX, :]).data .*
-            transpose(price)[zone_id.(gen[FLEX]), :]
+        energyrevenue[FLEX, :] = value.(EP[:vCHARGE_FLEX][FLEX, :]).data .*
+                                 transpose(price)[zone_id.(gen[FLEX]), :]
     end
     if setup["ParameterScale"] == 1
         energyrevenue *= ModelScalingFactor

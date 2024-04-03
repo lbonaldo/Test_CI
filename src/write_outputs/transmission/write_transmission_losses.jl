@@ -1,8 +1,8 @@
 function write_transmission_losses(
-    path::AbstractString,
-    inputs::Dict,
-    setup::Dict,
-    EP::Model,
+        path::AbstractString,
+        inputs::Dict,
+        setup::Dict,
+        EP::Model
 )
     T = inputs["T"]     # Number of time steps (hours)
     L = inputs["L"]     # Number of transmission lines
@@ -23,16 +23,16 @@ function write_transmission_losses(
         CSV.write(joinpath(path, "tlosses.csv"), dfTLosses)
     else
         dfTLosses = hcat(dfTLosses, DataFrame(tlosses, :auto))
-        auxNew_Names = [Symbol("Line"); Symbol("AnnualSum"); [Symbol("t$t") for t = 1:T]]
+        auxNew_Names = [Symbol("Line"); Symbol("AnnualSum"); [Symbol("t$t") for t in 1:T]]
         rename!(dfTLosses, auxNew_Names)
-        total =
-            DataFrame(["Total" sum(dfTLosses.AnnualSum) fill(0.0, (1, T))], auxNew_Names)
-        total[:, 3:T+2] .= sum(tlosses, dims = 1)
+        total = DataFrame(
+            ["Total" sum(dfTLosses.AnnualSum) fill(0.0, (1, T))], auxNew_Names)
+        total[:, 3:(T + 2)] .= sum(tlosses, dims = 1)
         dfTLosses = vcat(dfTLosses, total)
         CSV.write(
             joinpath(path, "tlosses.csv"),
             dftranspose(dfTLosses, false),
-            writeheader = false,
+            writeheader = false
         )
     end
     return nothing

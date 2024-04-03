@@ -22,7 +22,7 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
         "cUnmetRsv",
         "cNetworkExp",
         "cUnmetPolicyPenalty",
-        "cCO2",
+        "cCO2"
     ]
     if !isempty(VRE_STOR)
         push!(cost_list, "cGridConnection")
@@ -32,14 +32,12 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
     end
     dfCost = DataFrame(Costs = cost_list)
 
-    cVar =
-        value(EP[:eTotalCVarOut]) +
-        (!isempty(inputs["STOR_ALL"]) ? value(EP[:eTotalCVarIn]) : 0.0) +
-        (!isempty(inputs["FLEX"]) ? value(EP[:eTotalCVarFlexIn]) : 0.0)
-    cFix =
-        value(EP[:eTotalCFix]) +
-        (!isempty(inputs["STOR_ALL"]) ? value(EP[:eTotalCFixEnergy]) : 0.0) +
-        (!isempty(inputs["STOR_ASYMMETRIC"]) ? value(EP[:eTotalCFixCharge]) : 0.0)
+    cVar = value(EP[:eTotalCVarOut]) +
+           (!isempty(inputs["STOR_ALL"]) ? value(EP[:eTotalCVarIn]) : 0.0) +
+           (!isempty(inputs["FLEX"]) ? value(EP[:eTotalCVarFlexIn]) : 0.0)
+    cFix = value(EP[:eTotalCFix]) +
+           (!isempty(inputs["STOR_ALL"]) ? value(EP[:eTotalCFixEnergy]) : 0.0) +
+           (!isempty(inputs["STOR_ASYMMETRIC"]) ? value(EP[:eTotalCFixCharge]) : 0.0)
 
     cFuel = value.(EP[:eTotalCFuelOut])
 
@@ -86,7 +84,7 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
             0.0,
             0.0,
             0.0,
-            0.0,
+            0.0
         ]
     else
         total_cost = [
@@ -99,14 +97,14 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
             0.0,
             0.0,
             0.0,
-            0.0,
+            0.0
         ]
     end
 
     if !isempty(ELECTROLYZER)
         push!(
             total_cost,
-            (!isempty(inputs["ELECTROLYZER"]) ? -1 * value(EP[:eTotalHydrogenValue]) : 0.0),
+            (!isempty(inputs["ELECTROLYZER"]) ? -1 * value(EP[:eTotalHydrogenValue]) : 0.0)
         )
     end
 
@@ -145,9 +143,8 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
     end
 
     if !isempty(VRE_STOR)
-        dfCost[!, 2][11] =
-            value(EP[:eTotalCGrid]) *
-            (setup["ParameterScale"] == 1 ? ModelScalingFactor^2 : 1)
+        dfCost[!, 2][11] = value(EP[:eTotalCGrid]) *
+                           (setup["ParameterScale"] == 1 ? ModelScalingFactor^2 : 1)
     end
 
     if any(co2_capture_fraction.(gen) .!= 0)
@@ -162,7 +159,7 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
         dfCost[10, 2] *= ModelScalingFactor^2
     end
 
-    for z = 1:Z
+    for z in 1:Z
         tempCTotal = 0.0
         tempCFix = 0.0
         tempCVar = 0.0
@@ -228,29 +225,25 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
             STOR_ALL_ZONE_VRE_STOR = intersect(inputs["VS_STOR"], Y_ZONE_VRE_STOR)
             if !isempty(STOR_ALL_ZONE_VRE_STOR)
                 eCFix_VRE_STOR += sum(value.(EP[:eCFixEnergy_VS][STOR_ALL_ZONE_VRE_STOR]))
-                DC_CHARGE_ALL_ZONE_VRE_STOR =
-                    intersect(inputs["VS_ASYM_DC_CHARGE"], Y_ZONE_VRE_STOR)
+                DC_CHARGE_ALL_ZONE_VRE_STOR = intersect(
+                    inputs["VS_ASYM_DC_CHARGE"], Y_ZONE_VRE_STOR)
                 if !isempty(DC_CHARGE_ALL_ZONE_VRE_STOR)
-                    eCFix_VRE_STOR +=
-                        sum(value.(EP[:eCFixCharge_DC][DC_CHARGE_ALL_ZONE_VRE_STOR]))
+                    eCFix_VRE_STOR += sum(value.(EP[:eCFixCharge_DC][DC_CHARGE_ALL_ZONE_VRE_STOR]))
                 end
-                DC_DISCHARGE_ALL_ZONE_VRE_STOR =
-                    intersect(inputs["VS_ASYM_DC_DISCHARGE"], Y_ZONE_VRE_STOR)
+                DC_DISCHARGE_ALL_ZONE_VRE_STOR = intersect(
+                    inputs["VS_ASYM_DC_DISCHARGE"], Y_ZONE_VRE_STOR)
                 if !isempty(DC_DISCHARGE_ALL_ZONE_VRE_STOR)
-                    eCFix_VRE_STOR +=
-                        sum(value.(EP[:eCFixDischarge_DC][DC_DISCHARGE_ALL_ZONE_VRE_STOR]))
+                    eCFix_VRE_STOR += sum(value.(EP[:eCFixDischarge_DC][DC_DISCHARGE_ALL_ZONE_VRE_STOR]))
                 end
-                AC_DISCHARGE_ALL_ZONE_VRE_STOR =
-                    intersect(inputs["VS_ASYM_AC_DISCHARGE"], Y_ZONE_VRE_STOR)
+                AC_DISCHARGE_ALL_ZONE_VRE_STOR = intersect(
+                    inputs["VS_ASYM_AC_DISCHARGE"], Y_ZONE_VRE_STOR)
                 if !isempty(AC_DISCHARGE_ALL_ZONE_VRE_STOR)
-                    eCFix_VRE_STOR +=
-                        sum(value.(EP[:eCFixDischarge_AC][AC_DISCHARGE_ALL_ZONE_VRE_STOR]))
+                    eCFix_VRE_STOR += sum(value.(EP[:eCFixDischarge_AC][AC_DISCHARGE_ALL_ZONE_VRE_STOR]))
                 end
-                AC_CHARGE_ALL_ZONE_VRE_STOR =
-                    intersect(inputs["VS_ASYM_AC_CHARGE"], Y_ZONE_VRE_STOR)
+                AC_CHARGE_ALL_ZONE_VRE_STOR = intersect(
+                    inputs["VS_ASYM_AC_CHARGE"], Y_ZONE_VRE_STOR)
                 if !isempty(AC_CHARGE_ALL_ZONE_VRE_STOR)
-                    eCFix_VRE_STOR +=
-                        sum(value.(EP[:eCFixCharge_AC][AC_CHARGE_ALL_ZONE_VRE_STOR]))
+                    eCFix_VRE_STOR += sum(value.(EP[:eCFixCharge_AC][AC_CHARGE_ALL_ZONE_VRE_STOR]))
                 end
             end
             tempCFix += eCFix_VRE_STOR
@@ -268,7 +261,7 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
                     DC_CHARGE_ALL_ZONE_VRE_STOR => :eCVar_Charge_DC,
                     DC_DISCHARGE_ALL_ZONE_VRE_STOR => :eCVar_Discharge_DC,
                     AC_DISCHARGE_ALL_ZONE_VRE_STOR => :eCVar_Discharge_AC,
-                    AC_CHARGE_ALL_ZONE_VRE_STOR => :eCVar_Charge_AC,
+                    AC_CHARGE_ALL_ZONE_VRE_STOR => :eCVar_Charge_AC
                 )
                 for (set, symbol) in vom_map
                     if !isempty(set)
@@ -283,9 +276,8 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
         end
 
         if setup["UCommit"] >= 1 && !isempty(COMMIT_ZONE)
-            eCStart =
-                sum(value.(EP[:eCStart][COMMIT_ZONE, :])) +
-                sum(value.(EP[:ePlantCFuelStart][COMMIT_ZONE, :]))
+            eCStart = sum(value.(EP[:eCStart][COMMIT_ZONE, :])) +
+                      sum(value.(EP[:ePlantCFuelStart][COMMIT_ZONE, :]))
             tempCStart += eCStart
             tempCTotal += eCStart
         end
@@ -294,7 +286,6 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
             tempHydrogenValue = -1 * sum(value.(EP[:eHydrogenValue][ELECTROLYZERS_ZONE, :]))
             tempCTotal += tempHydrogenValue
         end
-
 
         tempCNSE = sum(value.(EP[:eCNSE][:, :, z]))
         tempCTotal += tempCNSE
@@ -325,7 +316,7 @@ function write_costs(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
             "-",
             "-",
             "-",
-            tempCCO2,
+            tempCCO2
         ]
         if !isempty(VRE_STOR)
             push!(temp_cost_list, "-")

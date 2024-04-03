@@ -21,26 +21,24 @@ function thermal!(EP::Model, inputs::Dict, setup::Dict)
         thermal_no_commit!(EP, inputs, setup)
     end
     ##CO2 Polcy Module Thermal Generation by zone
-    @expression(
-        EP,
+    @expression(EP,
         eGenerationByThermAll[z = 1:Z, t = 1:T], # the unit is GW
         sum(
-            EP[:vP][y, t] for
-            y in intersect(inputs["THERM_ALL"], resources_in_zone_by_rid(gen, z))
-        )
-    )
+            EP[:vP][y, t]
+        for
+        y in intersect(inputs["THERM_ALL"], resources_in_zone_by_rid(gen, z))
+        ))
     add_similar_to_expression!(EP[:eGenerationByZone], eGenerationByThermAll)
 
     # Capacity Reserves Margin policy
     if setup["CapacityReserveMargin"] > 0
         ncapres = inputs["NCapacityReserveMargin"]
-        @expression(
-            EP,
+        @expression(EP,
             eCapResMarBalanceThermal[capres in 1:ncapres, t in 1:T],
             sum(
-                derating_factor(gen[y], tag = capres) * EP[:eTotalCap][y] for y in THERM_ALL
-            )
-        )
+                derating_factor(gen[y], tag = capres) * EP[:eTotalCap][y]
+            for y in THERM_ALL
+            ))
         add_similar_to_expression!(EP[:eCapResMarBalance], eCapResMarBalanceThermal)
 
         MAINT = ids_with_maintenance(gen)

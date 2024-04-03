@@ -9,7 +9,6 @@
 This function sets up reserve decisions and constraints, using the operational_reserves_core()` and operational_reserves_contingency()` functions.
 """
 function operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
-
     UCommit = setup["UCommit"]
 
     if inputs["pStatic_Contingency"] > 0 ||
@@ -19,7 +18,6 @@ function operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
 
     operational_reserves_core!(EP, inputs, setup)
 end
-
 
 @doc raw"""
 	operational_reserves_contingency!(EP::Model, inputs::Dict, setup::Dict)
@@ -69,7 +67,6 @@ Option 3 (dynamic commitment-based contingency) is expressed by the following se
 where $M_y$ is a `big M' constant equal to the largest possible capacity that can be installed for generation cluster $y$, and $Contingency\_Aux_{y,z,t} \in [0,1]$ is a binary auxiliary variable that is forced by the second and third equations above to be 1 if the commitment state for that generation cluster $\nu_{y,z,t} > 0$ for any generator $y \in \mathcal{UC}$ and zone $z$ and time period $t$, and can be 0 otherwise. Note that this dynamic commitment-based contingency can only be specified if discrete unit commitment decisions are used (e.g. it will not work if relaxed unit commitment is used).
 """
 function operational_reserves_contingency!(EP::Model, inputs::Dict, setup::Dict)
-
     println("Operational Reserves Contingency Module")
 
     gen = inputs["RESOURCES"]
@@ -87,12 +84,12 @@ function operational_reserves_contingency!(EP::Model, inputs::Dict, setup::Dict)
     # NOTE: If Dynamic_Contingency == 0, then contingency is a fixed parameter equal the value specified in Operational_reserves.csv via pStatic_Contingency.
     if UCommit == 1 && pDynamic_Contingency == 1
         # Contingency = largest installed thermal unit
-        @variable(EP, vLARGEST_CONTINGENCY >= 0)
+        @variable(EP, vLARGEST_CONTINGENCY>=0)
         # Auxiliary variable that is 0 if vCAP = 0, 1 otherwise
         @variable(EP, vCONTINGENCY_AUX[y in COMMIT], Bin)
     elseif UCommit == 1 && pDynamic_Contingency == 2
         # Contingency = largest committed thermal unit in each time period
-        @variable(EP, vLARGEST_CONTINGENCY[t = 1:T] >= 0)
+        @variable(EP, vLARGEST_CONTINGENCY[t = 1:T]>=0)
         # Auxiliary variable that is 0 if vCOMMIT = 0, 1 otherwise
         @variable(EP, vCONTINGENCY_AUX[y in COMMIT, t = 1:T], Bin)
     end
@@ -123,43 +120,31 @@ function operational_reserves_contingency!(EP::Model, inputs::Dict, setup::Dict)
     # Dynamic contingency related constraints
     # option 1: ensures vLARGEST_CONTINGENCY is greater than the capacity of the largest installed generator
     if UCommit == 1 && pDynamic_Contingency == 1
-        @constraint(
-            EP,
+        @constraint(EP,
             cContingency[y in COMMIT],
-            vLARGEST_CONTINGENCY >= cap_size(gen[y]) * vCONTINGENCY_AUX[y]
-        )
+            vLARGEST_CONTINGENCY>=cap_size(gen[y]) * vCONTINGENCY_AUX[y])
         # Ensure vCONTINGENCY_AUX = 0 if total capacity = 0
-        @constraint(EP, cContAux1[y in COMMIT], vCONTINGENCY_AUX[y] <= EP[:eTotalCap][y])
+        @constraint(EP, cContAux1[y in COMMIT], vCONTINGENCY_AUX[y]<=EP[:eTotalCap][y])
         # Ensure vCONTINGENCY_AUX = 1 if total capacity > 0
-        @constraint(
-            EP,
+        @constraint(EP,
             cContAux2[y in COMMIT],
-            EP[:eTotalCap][y] <= inputs["pContingency_BigM"][y] * vCONTINGENCY_AUX[y]
-        )
+            EP[:eTotalCap][y]<=inputs["pContingency_BigM"][y] * vCONTINGENCY_AUX[y])
 
         # option 2: ensures vLARGEST_CONTINGENCY is greater than the capacity of the largest commited generator in each hour
     elseif UCommit == 1 && pDynamic_Contingency == 2
-        @constraint(
-            EP,
+        @constraint(EP,
             cContingency[y in COMMIT, t = 1:T],
-            vLARGEST_CONTINGENCY[t] >= cap_size(gen[y]) * vCONTINGENCY_AUX[y, t]
-        )
+            vLARGEST_CONTINGENCY[t]>=cap_size(gen[y]) * vCONTINGENCY_AUX[y, t])
         # Ensure vCONTINGENCY_AUX = 0 if vCOMMIT = 0
-        @constraint(
-            EP,
+        @constraint(EP,
             cContAux[y in COMMIT, t = 1:T],
-            vCONTINGENCY_AUX[y, t] <= EP[:vCOMMIT][y, t]
-        )
+            vCONTINGENCY_AUX[y, t]<=EP[:vCOMMIT][y, t])
         # Ensure vCONTINGENCY_AUX = 1 if vCOMMIT > 0
-        @constraint(
-            EP,
+        @constraint(EP,
             cContAux2[y in COMMIT, t = 1:T],
-            EP[:vCOMMIT][y, t] <= inputs["pContingency_BigM"][y] * vCONTINGENCY_AUX[y, t]
-        )
+            EP[:vCOMMIT][y, t]<=inputs["pContingency_BigM"][y] * vCONTINGENCY_AUX[y, t])
     end
-
 end
-
 
 @doc raw"""
 	operational_reserves_core!(EP::Model, inputs::Dict, setup::Dict)
@@ -247,47 +232,48 @@ function operational_reserves_core!(EP::Model, inputs::Dict, setup::Dict)
     pP_Max(y, t) = inputs["pP_Max"][y, t]
 
     systemwide_hourly_demand = sum(pDemand, dims = 2)
-    must_run_vre_generation(t) = sum(
-        pP_Max(y, t) * EP[:eTotalCap][y] for
-        y in intersect(inputs["VRE"], inputs["MUST_RUN"]);
-        init = 0,
-    )
+    function must_run_vre_generation(t)
+        sum(
+            pP_Max(y, t) * EP[:eTotalCap][y]
+            for
+            y in intersect(inputs["VRE"], inputs["MUST_RUN"]);
+            init = 0
+        )
+    end
 
     ### Variables ###
 
     ## Integer Unit Commitment configuration for variables
 
     ## Decision variables for operational reserves
-    @variable(EP, vREG[y in REG, t = 1:T] >= 0) # Contribution to regulation (primary reserves), assumed to be symmetric (up & down directions equal)
-    @variable(EP, vRSV[y in RSV, t = 1:T] >= 0) # Contribution to operating reserves (secondary reserves or contingency reserves); only model upward reserve requirements
+    @variable(EP, vREG[y in REG, t = 1:T]>=0) # Contribution to regulation (primary reserves), assumed to be symmetric (up & down directions equal)
+    @variable(EP, vRSV[y in RSV, t = 1:T]>=0) # Contribution to operating reserves (secondary reserves or contingency reserves); only model upward reserve requirements
 
     # Storage techs have two pairs of auxilary variables to reflect contributions to regulation and reserves
     # when charging and discharging (primary variable becomes equal to sum of these auxilary variables)
-    @variable(EP, vREG_discharge[y in intersect(STOR_ALL, REG), t = 1:T] >= 0) # Contribution to regulation (primary reserves) (mirrored variable used for storage devices)
-    @variable(EP, vRSV_discharge[y in intersect(STOR_ALL, RSV), t = 1:T] >= 0) # Contribution to operating reserves (secondary reserves) (mirrored variable used for storage devices)
-    @variable(EP, vREG_charge[y in intersect(STOR_ALL, REG), t = 1:T] >= 0) # Contribution to regulation (primary reserves) (mirrored variable used for storage devices)
-    @variable(EP, vRSV_charge[y in intersect(STOR_ALL, RSV), t = 1:T] >= 0) # Contribution to operating reserves (secondary reserves) (mirrored variable used for storage devices)
+    @variable(EP, vREG_discharge[y in intersect(STOR_ALL, REG), t = 1:T]>=0) # Contribution to regulation (primary reserves) (mirrored variable used for storage devices)
+    @variable(EP, vRSV_discharge[y in intersect(STOR_ALL, RSV), t = 1:T]>=0) # Contribution to operating reserves (secondary reserves) (mirrored variable used for storage devices)
+    @variable(EP, vREG_charge[y in intersect(STOR_ALL, REG), t = 1:T]>=0) # Contribution to regulation (primary reserves) (mirrored variable used for storage devices)
+    @variable(EP, vRSV_charge[y in intersect(STOR_ALL, RSV), t = 1:T]>=0) # Contribution to operating reserves (secondary reserves) (mirrored variable used for storage devices)
 
-    @variable(EP, vUNMET_RSV[t = 1:T] >= 0) # Unmet operating reserves penalty/cost
+    @variable(EP, vUNMET_RSV[t = 1:T]>=0) # Unmet operating reserves penalty/cost
 
     ### Expressions ###
     ## Total system reserve expressions
     # Regulation requirements as a percentage of demand and scheduled variable renewable energy production in each hour
     # Reg up and down requirements are symmetric
-    @expression(
-        EP,
+    @expression(EP,
         eRegReq[t = 1:T],
-        inputs["pReg_Req_Demand"] * systemwide_hourly_demand[t] +
-        inputs["pReg_Req_VRE"] * must_run_vre_generation(t)
-    )
+        inputs["pReg_Req_Demand"] *
+        systemwide_hourly_demand[t]+
+        inputs["pReg_Req_VRE"] * must_run_vre_generation(t))
     # Operating reserve up / contingency reserve requirements as ˚a percentage of demand and scheduled variable renewable energy production in each hour
     # and the largest single contingency (generator or transmission line outage)
-    @expression(
-        EP,
+    @expression(EP,
         eRsvReq[t = 1:T],
-        inputs["pRsv_Req_Demand"] * systemwide_hourly_demand[t] +
-        inputs["pRsv_Req_VRE"] * must_run_vre_generation(t)
-    )
+        inputs["pRsv_Req_Demand"] *
+        systemwide_hourly_demand[t]+
+        inputs["pRsv_Req_VRE"] * must_run_vre_generation(t))
 
     # N-1 contingency requirement is considered only if Unit Commitment is being modeled
     if UCommit >= 1 &&
@@ -298,18 +284,14 @@ function operational_reserves_core!(EP::Model, inputs::Dict, setup::Dict)
     ## Objective Function Expressions ##
 
     # Penalty for unmet operating reserves
-    @expression(
-        EP,
+    @expression(EP,
         eCRsvPen[t = 1:T],
-        inputs["omega"][t] * inputs["pC_Rsv_Penalty"] * vUNMET_RSV[t]
-    )
-    @expression(
-        EP,
+        inputs["omega"][t]*inputs["pC_Rsv_Penalty"]*vUNMET_RSV[t])
+    @expression(EP,
         eTotalCRsvPen,
-        sum(eCRsvPen[t] for t = 1:T) +
-        sum(reg_cost(gen[y]) * vRSV[y, t] for y in RSV, t = 1:T) +
-        sum(rsv_cost(gen[y]) * vREG[y, t] for y in REG, t = 1:T)
-    )
+        sum(eCRsvPen[t] for t in 1:T)+
+        sum(reg_cost(gen[y]) * vRSV[y, t] for y in RSV, t in 1:T)+
+        sum(rsv_cost(gen[y]) * vREG[y, t] for y in REG, t in 1:T))
     add_to_expression!(EP[:eObj], eTotalCRsvPen)
 end
 
@@ -331,17 +313,13 @@ function operational_reserves_constraints!(EP, inputs)
     # contributing to regulation are assumed to contribute equal capacity to both up
     # and down directions
     if !isempty(REG)
-        @constraint(
-            EP,
+        @constraint(EP,
             cReg[t = 1:T],
-            sum(vREG[y, t] for y in REG) >= eRegulationRequirement[t]
-        )
+            sum(vREG[y, t] for y in REG)>=eRegulationRequirement[t])
     end
     if !isempty(RSV)
-        @constraint(
-            EP,
+        @constraint(EP,
             cRsvReq[t = 1:T],
-            sum(vRSV[y, t] for y in RSV) + vUNMET_RSV[t] >= eReserveRequirement[t]
-        )
+            sum(vRSV[y, t] for y in RSV) + vUNMET_RSV[t]>=eReserveRequirement[t])
     end
 end

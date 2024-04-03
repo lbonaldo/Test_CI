@@ -21,12 +21,12 @@ function load_fuels_data!(setup::Dict, path::AbstractString, inputs::Dict)
     fuels = names(fuels_in)[2:end]
     costs = Matrix(fuels_in[2:end, 2:end])
     CO2_content = fuels_in[1, 2:end] # tons CO2/MMBtu
-    fuel_costs = Dict{AbstractString,Array{Float64}}()
-    fuel_CO2 = Dict{AbstractString,Float64}()
+    fuel_costs = Dict{AbstractString, Array{Float64}}()
+    fuel_CO2 = Dict{AbstractString, Float64}()
 
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
 
-    for i = 1:length(fuels)
+    for i in 1:length(fuels)
         # fuel cost is in $/MMBTU w/o scaling, $/Billon BTU w/ scaling
         fuel_costs[fuels[i]] = costs[:, i] / scale_factor
         # No need to scale fuel_CO2, fuel_CO2 is ton/MMBTU or kton/Billion BTU 

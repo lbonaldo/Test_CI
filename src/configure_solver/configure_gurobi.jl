@@ -21,9 +21,8 @@ The Gurobi optimizer instance is configured with the following default parameter
 
 """
 function configure_gurobi(solver_settings_path::String, optimizer::Any)
-
     solver_settings = YAML.load(open(solver_settings_path))
-    solver_settings = convert(Dict{String,Any}, solver_settings)
+    solver_settings = convert(Dict{String, Any}, solver_settings)
 
     default_settings = Dict(
         "Feasib_Tol" => 1e-6,
@@ -37,7 +36,7 @@ function configure_gurobi(solver_settings_path::String, optimizer::Any)
         "Method" => -1,
         "BarConvTol" => 1e-8,
         "NumericFocus" => 0,
-        "OutputFlag" => 1,
+        "OutputFlag" => 1
     )
 
     attributes = merge(default_settings, solver_settings)
@@ -45,11 +44,11 @@ function configure_gurobi(solver_settings_path::String, optimizer::Any)
     key_replacement = Dict(
         "Feasib_Tol" => "FeasibilityTol",
         "Optimal_Tol" => "OptimalityTol",
-        "Pre_Solve" => "Presolve",
+        "Pre_Solve" => "Presolve"
     )
 
     attributes = rename_keys(attributes, key_replacement)
 
-    attributes::Dict{String,Any}
+    attributes::Dict{String, Any}
     return optimizer_with_attributes(optimizer, attributes...)
 end

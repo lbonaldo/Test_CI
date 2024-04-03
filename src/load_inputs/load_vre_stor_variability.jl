@@ -37,10 +37,10 @@ function load_vre_stor_variability!(setup::Dict, path::AbstractString, inputs::D
     select!(vre_stor_wind, [:Time_Index; Symbol.(all_resources)])
 
     # Maximum power output and variability of each energy resource
-    inputs["pP_Max_Solar"] =
-        transpose(Matrix{Float64}(vre_stor_solar[1:inputs["T"], 2:(inputs["G"]+1)]))
-    inputs["pP_Max_Wind"] =
-        transpose(Matrix{Float64}(vre_stor_wind[1:inputs["T"], 2:(inputs["G"]+1)]))
+    inputs["pP_Max_Solar"] = transpose(Matrix{Float64}(vre_stor_solar[
+        1:inputs["T"], 2:(inputs["G"] + 1)]))
+    inputs["pP_Max_Wind"] = transpose(Matrix{Float64}(vre_stor_wind[
+        1:inputs["T"], 2:(inputs["G"] + 1)]))
 
     println(filename1 * " Successfully Read!")
     println(filename2 * " Successfully Read!")

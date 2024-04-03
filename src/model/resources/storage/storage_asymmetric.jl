@@ -25,21 +25,16 @@ function storage_asymmetric!(EP::Model, inputs::Dict, setup::Dict)
     else
         if CapacityReserveMargin > 0
             # Maximum charging rate (including virtual charging to move energy held in reserve back to available storage) must be less than charge power rating
-            @constraint(
-                EP,
+            @constraint(EP,
                 [y in STOR_ASYMMETRIC, t in 1:T],
-                EP[:vCHARGE][y, t] + EP[:vCAPRES_charge][y, t] <= EP[:eTotalCapCharge][y]
-            )
+                EP[:vCHARGE][y, t] + EP[:vCAPRES_charge][y, t]<=EP[:eTotalCapCharge][y])
         else
             # Maximum charging rate (including virtual charging to move energy held in reserve back to available storage) must be less than charge power rating
-            @constraint(
-                EP,
+            @constraint(EP,
                 [y in STOR_ASYMMETRIC, t in 1:T],
-                EP[:vCHARGE][y, t] <= EP[:eTotalCapCharge][y]
-            )
+                EP[:vCHARGE][y, t]<=EP[:eTotalCapCharge][y])
         end
     end
-
 end
 
 @doc raw"""
@@ -48,7 +43,6 @@ end
 Sets up variables and constraints specific to storage resources with asymmetric charge and discharge capacities when reserves are modeled. See ```storage()``` in ```storage.jl``` for description of constraints.
 """
 function storage_asymmetric_operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
-
     T = inputs["T"]
     CapacityReserveMargin = setup["CapacityReserveMargin"] > 0
 
@@ -65,8 +59,8 @@ function storage_asymmetric_operational_reserves!(EP::Model, inputs::Dict, setup
         vCAPRES_charge = EP[:vCAPRES_charge]
         add_similar_to_expression!(
             expr[STOR_ASYMMETRIC, :],
-            vCAPRES_charge[STOR_ASYMMETRIC, :],
+            vCAPRES_charge[STOR_ASYMMETRIC, :]
         )
     end
-    @constraint(EP, [y in STOR_ASYMMETRIC, t in 1:T], expr[y, t] <= eTotalCapCharge[y])
+    @constraint(EP, [y in STOR_ASYMMETRIC, t in 1:T], expr[y, t]<=eTotalCapCharge[y])
 end

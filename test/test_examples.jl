@@ -5,7 +5,6 @@ using GenX
 
 include(joinpath(@__DIR__, "utilities.jl"))
 
-
 # Test that the examples in the example_systems directory run without error
 function test_examples()
     base_path = Base.dirname(Base.dirname(pathof(GenX)))

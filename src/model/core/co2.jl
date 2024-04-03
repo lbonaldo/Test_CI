@@ -51,7 +51,6 @@ eEmissionsCaptureByPlant_{g,t} = CO2\_Capture\_Fraction_y * vFuel_{y,t}  * CO2_{
 
 """
 function co2!(EP::Model, inputs::Dict)
-
     println("CO2 Module")
 
     gen = inputs["RESOURCES"]
@@ -73,8 +72,7 @@ function co2!(EP::Model, inputs::Dict)
     # If all the CO2 capture fractions from Generators_data are zeros, the CO2 emissions from thermal generators are determined by fuel consumption times CO2 content per MMBTU 
 
     if isempty(CCS)
-        @expression(
-            EP,
+        @expression(EP,
             eEmissionsByPlant[y = 1:G, t = 1:T],
             if y in SINGLE_FUEL
                 (
@@ -88,17 +86,15 @@ function co2!(EP::Model, inputs::Dict)
                         (1 - biomass(gen[y])) *
                         (EP[:vMulFuels][y, i, t] + EP[:vMulStartFuels][y, i, t]) *
                         fuel_CO2[fuel_cols(gen[y], tag = i)]
-                    ) for i = 1:max_fuels
+                    ) for i in 1:max_fuels
                 )
-            end
-        )
+            end)
     else
         @info "Using the CO2 module to determine the CO2 emissions of CCS-equipped plants"
         # CO2_Capture_Fraction refers to the CO2 capture rate of CCS equiped power plants at a steady state 
         # CO2_Capture_Fraction_Startup refers to the CO2 capture rate of CCS equiped power plants during startup events
 
-        @expression(
-            EP,
+        @expression(EP,
             eEmissionsByPlant[y = 1:G, t = 1:T],
             if y in SINGLE_FUEL
                 (1 - biomass(gen[y]) - co2_capture_fraction(gen[y])) *
@@ -111,18 +107,16 @@ function co2!(EP::Model, inputs::Dict)
                 sum(
                     (1 - biomass(gen[y]) - co2_capture_fraction(gen[y])) *
                     EP[:vMulFuels][y, i, t] *
-                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i = 1:max_fuels
+                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i in 1:max_fuels
                 ) + sum(
                     (1 - biomass(gen[y]) - co2_capture_fraction_startup(gen[y])) *
                     EP[:vMulStartFuels][y, i, t] *
-                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i = 1:max_fuels
+                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i in 1:max_fuels
                 )
-            end
-        )
+            end)
 
         # CO2 captured from power plants in "Generators_data.csv"
-        @expression(
-            EP,
+        @expression(EP,
             eEmissionsCaptureByPlant[y in CCS, t = 1:T],
             if y in SINGLE_FUEL
                 co2_capture_fraction(gen[y]) * EP[:vFuel][y, t] * fuel_CO2[fuel(gen[y])] +
@@ -133,56 +127,45 @@ function co2!(EP::Model, inputs::Dict)
                 sum(
                     co2_capture_fraction(gen[y]) *
                     EP[:vMulFuels][y, i, t] *
-                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i = 1:max_fuels
+                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i in 1:max_fuels
                 ) + sum(
                     co2_capture_fraction_startup(gen[y]) *
                     EP[:vMulStartFuels][y, i, t] *
-                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i = 1:max_fuels
+                    fuel_CO2[fuel_cols(gen[y], tag = i)] for i in 1:max_fuels
                 )
-            end
-        )
+            end)
 
-        @expression(
-            EP,
+        @expression(EP,
             eEmissionsCaptureByPlantYear[y in CCS],
-            sum(omega[t] * eEmissionsCaptureByPlant[y, t] for t = 1:T)
-        )
+            sum(omega[t] * eEmissionsCaptureByPlant[y, t] for t in 1:T))
         # add CO2 sequestration cost to objective function
         # when scale factor is on tCO2/MWh = > kt CO2/GWh
-        @expression(
-            EP,
+        @expression(EP,
             ePlantCCO2Sequestration[y in CCS],
             sum(
                 omega[t] *
                 eEmissionsCaptureByPlant[y, t] *
-                ccs_disposal_cost_per_metric_ton(gen[y]) for t = 1:T
-            )
-        )
+                ccs_disposal_cost_per_metric_ton(gen[y]) for t in 1:T
+            ))
 
-        @expression(
-            EP,
+        @expression(EP,
             eZonalCCO2Sequestration[z = 1:Z],
             sum(
-                ePlantCCO2Sequestration[y] for
-                y in intersect(resources_in_zone_by_rid(gen, z), CCS)
-            )
-        )
+                ePlantCCO2Sequestration[y]
+            for
+            y in intersect(resources_in_zone_by_rid(gen, z), CCS)
+            ))
 
-        @expression(
-            EP,
+        @expression(EP,
             eTotaleCCO2Sequestration,
-            sum(eZonalCCO2Sequestration[z] for z = 1:Z)
-        )
+            sum(eZonalCCO2Sequestration[z] for z in 1:Z))
 
         add_to_expression!(EP[:eObj], EP[:eTotaleCCO2Sequestration])
     end
 
     # emissions by zone
-    @expression(
-        EP,
+    @expression(EP,
         eEmissionsByZone[z = 1:Z, t = 1:T],
-        sum(eEmissionsByPlant[y, t] for y in resources_in_zone_by_rid(gen, z))
-    )
+        sum(eEmissionsByPlant[y, t] for y in resources_in_zone_by_rid(gen, z)))
     return EP
-
 end

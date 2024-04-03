@@ -20,7 +20,6 @@
         \end{aligned}
 """
 function investment_transmission!(EP::Model, inputs::Dict, setup::Dict)
-
     println("Investment Transmission Module")
 
     L = inputs["L"]     # Number of transmission lines
@@ -35,14 +34,13 @@ function investment_transmission!(EP::Model, inputs::Dict, setup::Dict)
     ### Variables ###
 
     if MultiStage == 1
-        @variable(EP, vTRANSMAX[l = 1:L] >= 0)
+        @variable(EP, vTRANSMAX[l = 1:L]>=0)
     end
 
     if NetworkExpansion == 1
         # Transmission network capacity reinforcements per line
-        @variable(EP, vNEW_TRANS_CAP[l in EXPANSION_LINES] >= 0)
+        @variable(EP, vNEW_TRANS_CAP[l in EXPANSION_LINES]>=0)
     end
-
 
     ### Expressions ###
 
@@ -61,20 +59,19 @@ function investment_transmission!(EP::Model, inputs::Dict, setup::Dict)
             eTransMax[l] + EP[:vZERO]
         end)
     else
-        @expression(EP, eAvail_Trans_Cap[l = 1:L], eTransMax[l] + EP[:vZERO])
+        @expression(EP, eAvail_Trans_Cap[l = 1:L], eTransMax[l]+EP[:vZERO])
     end
 
     ## Objective Function Expressions ##
 
     if NetworkExpansion == 1
-        @expression(
-            EP,
+        @expression(EP,
             eTotalCNetworkExp,
             sum(
-                vNEW_TRANS_CAP[l] * inputs["pC_Line_Reinforcement"][l] for
-                l in EXPANSION_LINES
-            )
-        )
+                vNEW_TRANS_CAP[l] * inputs["pC_Line_Reinforcement"][l]
+            for
+            l in EXPANSION_LINES
+            ))
 
         if MultiStage == 1
             # OPEX multiplier to count multiple years between two model stages
@@ -92,27 +89,22 @@ function investment_transmission!(EP::Model, inputs::Dict, setup::Dict)
 
     if MultiStage == 1
         # Linking constraint for existing transmission capacity
-        @constraint(EP, cExistingTransCap[l = 1:L], vTRANSMAX[l] == inputs["pTrans_Max"][l])
+        @constraint(EP, cExistingTransCap[l = 1:L], vTRANSMAX[l]==inputs["pTrans_Max"][l])
     end
-
 
     # If network expansion is used:
     if NetworkExpansion == 1
         # Transmission network related power flow and capacity constraints
         if MultiStage == 1
             # Constrain maximum possible flow for lines eligible for expansion regardless of previous expansions
-            @constraint(
-                EP,
+            @constraint(EP,
                 cMaxFlowPossible[l in EXPANSION_LINES],
-                eAvail_Trans_Cap[l] <= inputs["pTrans_Max_Possible"][l]
-            )
+                eAvail_Trans_Cap[l]<=inputs["pTrans_Max_Possible"][l])
         end
         # Constrain maximum single-stage line capacity reinforcement for lines eligible for expansion
-        @constraint(
-            EP,
+        @constraint(EP,
             cMaxLineReinforcement[l in EXPANSION_LINES],
-            vNEW_TRANS_CAP[l] <= inputs["pMax_Line_Reinforcement"][l]
-        )
+            vNEW_TRANS_CAP[l]<=inputs["pMax_Line_Reinforcement"][l])
     end
     #END network expansion contraints
 

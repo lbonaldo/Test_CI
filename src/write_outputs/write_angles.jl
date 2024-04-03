@@ -11,14 +11,14 @@ function write_angles(path::AbstractString, inputs::Dict, setup::Dict, EP::Model
     angles = value.(EP[:vANGLE])
     dfAngles = hcat(dfAngles, DataFrame(angles, :auto))
 
-    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t = 1:T]]
+    auxNew_Names = [Symbol("Zone"); [Symbol("t$t") for t in 1:T]]
     rename!(dfAngles, auxNew_Names)
 
     ## Linear configuration final output
     CSV.write(
         joinpath(path, "angles.csv"),
         dftranspose(dfAngles, false),
-        writeheader = false,
+        writeheader = false
     )
     return nothing
 end

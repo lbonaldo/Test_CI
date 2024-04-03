@@ -19,7 +19,7 @@ function write_charge(path::AbstractString, inputs::Dict, setup::Dict, EP::Model
     dfCharge = DataFrame(
         Resource = inputs["RESOURCE_NAMES"],
         Zone = zones,
-        AnnualSum = Array{Union{Missing,Float64}}(undef, G),
+        AnnualSum = Array{Union{Missing, Float64}}(undef, G)
     )
     charge = zeros(G, T)
 

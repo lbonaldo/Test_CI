@@ -67,7 +67,7 @@ function load_dataframe(dir::AbstractString, basenames::Vector{String})::DataFra
             Base.depwarn(
                 """The filename '$target' is deprecated. '$best_basename' is preferred.""",
                 :load_dataframe,
-                force = true,
+                force = true
             )
             return load_dataframe_from_file(joinpath(dir, target))
         end
@@ -136,20 +136,20 @@ function load_dataframe_from_file(path)::DataFrame
 end
 
 function find_matrix_columns_in_dataframe(
-    df::DataFrame,
-    columnprefix::AbstractString;
-    prefixseparator = '_',
+        df::DataFrame,
+        columnprefix::AbstractString;
+        prefixseparator = '_'
 )::Vector{Int}
     all_columns = names(df)
 
     # 2 is the length of the '_' connector plus one for indexing
-    get_integer_part(c) = tryparse(Int, c[length(columnprefix)+2:end])
+    get_integer_part(c) = tryparse(Int, c[(length(columnprefix) + 2):end])
 
     # if prefix is "ESR", the column name should be like "ESR_1"
     function is_of_this_column_type(c)
         startswith(c, columnprefix) &&
             length(c) >= length(columnprefix) + 2 &&
-            c[length(columnprefix)+1] == prefixseparator &&
+            c[length(columnprefix) + 1] == prefixseparator &&
             !isnothing(get_integer_part(c))
     end
 
@@ -173,15 +173,15 @@ ESR_1, other_thing, ESR_3, ESR_2,
 ```
 """
 function extract_matrix_from_dataframe(
-    df::DataFrame,
-    columnprefix::AbstractString;
-    prefixseparator = '_',
+        df::DataFrame,
+        columnprefix::AbstractString;
+        prefixseparator = '_'
 )
     all_columns = names(df)
     columnnumbers = find_matrix_columns_in_dataframe(
         df,
         columnprefix,
-        prefixseparator = prefixseparator,
+        prefixseparator = prefixseparator
     )
 
     if length(columnnumbers) == 0
@@ -203,14 +203,15 @@ function extract_matrix_from_dataframe(
 end
 
 function extract_matrix_from_resources(
-    rs::Vector{T},
-    columnprefix::AbstractString,
-    default = 0.0,
-) where {T<:AbstractResource}
+        rs::Vector{T},
+        columnprefix::AbstractString,
+        default = 0.0
+) where {T <: AbstractResource}
 
     # attributes starting with columnprefix with a numeric suffix
-    attributes_n =
-        [attr for attr in string.(attributes(rs[1])) if startswith(attr, columnprefix)]
+    attributes_n = [attr
+                    for attr in string.(attributes(rs[1]))
+                    if startswith(attr, columnprefix)]
     # sort the attributes by the numeric suffix
     sort!(attributes_n, by = x -> parse(Int, split(x, "_")[end]))
 

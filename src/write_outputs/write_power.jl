@@ -14,7 +14,7 @@ function write_power(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
     dfPower = DataFrame(
         Resource = inputs["RESOURCE_NAMES"],
         Zone = zones,
-        AnnualSum = Array{Union{Missing,Float64}}(undef, G),
+        AnnualSum = Array{Union{Missing, Float64}}(undef, G)
     )
     power = value.(EP[:vP])
     if setup["ParameterScale"] == 1

@@ -8,10 +8,10 @@ Function for reporting the operating reserve and regulation revenue earned by ge
     As a reminder, GenX models the operating reserve and regulation at the time-dependent level, and each constraint either stands for an overall market or a locality constraint.
 """
 function write_operating_reserve_regulation_revenue(
-    path::AbstractString,
-    inputs::Dict,
-    setup::Dict,
-    EP::Model,
+        path::AbstractString,
+        inputs::Dict,
+        setup::Dict,
+        EP::Model
 )
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
 
@@ -29,14 +29,14 @@ function write_operating_reserve_regulation_revenue(
         Resource = names[RSV],
         Zone = zones[RSV],
         Cluster = clusters[RSV],
-        AnnualSum = Array{Float64}(undef, length(RSV)),
+        AnnualSum = Array{Float64}(undef, length(RSV))
     )
     dfOpRegRevenue = DataFrame(
         Region = regions[REG],
         Resource = names[REG],
         Zone = zones[REG],
         Cluster = clusters[REG],
-        AnnualSum = Array{Float64}(undef, length(REG)),
+        AnnualSum = Array{Float64}(undef, length(REG))
     )
 
     weighted_reg_price = operating_regulation_price(EP, inputs, setup)

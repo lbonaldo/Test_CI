@@ -11,28 +11,27 @@ struct InputsTrue
     inputs_filename::AbstractString
 end
 
-
 function test_macro_interface(attr::Symbol, gen, dfGen)
     f = getfield(GenX, attr)
     @test f.(gen) == dfGen[!, attr]
 end
 
 function test_ids_with(attr::Symbol, gen, dfGen)
-    @test GenX.ids_with(gen, attr) == dfGen[dfGen[!, attr].!=0, :r_id]
+    @test GenX.ids_with(gen, attr) == dfGen[dfGen[!, attr] .!= 0, :r_id]
 end
 
 function test_ids_with_nonneg(attr::Symbol, gen, dfGen)
-    @test GenX.ids_with_nonneg(gen, attr) == dfGen[dfGen[!, attr].>=0, :r_id]
+    @test GenX.ids_with_nonneg(gen, attr) == dfGen[dfGen[!, attr] .>= 0, :r_id]
 end
 
 function test_ids_with_positive(attr::Symbol, gen, dfGen)
-    @test GenX.ids_with_positive(gen, attr) == dfGen[dfGen[!, attr].>0, :r_id]
+    @test GenX.ids_with_positive(gen, attr) == dfGen[dfGen[!, attr] .> 0, :r_id]
 end
 
 function prepare_inputs_true(
-    test_path::AbstractString,
-    in_filenames::InputsTrue,
-    setup::Dict,
+        test_path::AbstractString,
+        in_filenames::InputsTrue,
+        setup::Dict
 )
     gen_filename = in_filenames.gen_filename
     inputs_filename = in_filenames.inputs_filename
@@ -49,16 +48,16 @@ function test_load_scaled_resources_data(gen, dfGen)
 
     ## Test that the data loaded correctly
     # Test resource types
-    @test GenX.storage(gen) == dfGen[dfGen.stor.==1, :r_id]
-    @test GenX.thermal(gen) == dfGen[dfGen.therm.==1, :r_id]
-    @test GenX.vre(gen) == dfGen[dfGen.vre.==1, :r_id]
-    @test GenX.hydro(gen) == dfGen[dfGen.hydro.==1, :r_id]
-    @test GenX.flex_demand(gen) == dfGen[dfGen.flex.==1, :r_id]
-    @test GenX.electrolyzer(gen) == dfGen[dfGen.electrolyzer.==1, :r_id]
-    @test GenX.must_run(gen) == dfGen[dfGen.must_run.==1, :r_id]
+    @test GenX.storage(gen) == dfGen[dfGen.stor .== 1, :r_id]
+    @test GenX.thermal(gen) == dfGen[dfGen.therm .== 1, :r_id]
+    @test GenX.vre(gen) == dfGen[dfGen.vre .== 1, :r_id]
+    @test GenX.hydro(gen) == dfGen[dfGen.hydro .== 1, :r_id]
+    @test GenX.flex_demand(gen) == dfGen[dfGen.flex .== 1, :r_id]
+    @test GenX.electrolyzer(gen) == dfGen[dfGen.electrolyzer .== 1, :r_id]
+    @test GenX.must_run(gen) == dfGen[dfGen.must_run .== 1, :r_id]
 
-    @test GenX.is_LDS(gen) == dfGen[dfGen.lds.==1, :r_id]
-    @test GenX.is_SDS(gen) == dfGen[dfGen.lds.==0, :r_id]
+    @test GenX.is_LDS(gen) == dfGen[dfGen.lds .== 1, :r_id]
+    @test GenX.is_SDS(gen) == dfGen[dfGen.lds .== 0, :r_id]
 
     # Test resource attributes
     @test GenX.resource_name.(gen) == dfGen.resource
@@ -96,44 +95,44 @@ function test_load_scaled_resources_data(gen, dfGen)
           dfGen.ccs_disposal_cost_per_metric_ton
     @test GenX.biomass.(gen) == dfGen.biomass
     ## multi-fuel flags
-    @test GenX.ids_with_fuel(gen) == dfGen[(dfGen[!, :fuel].!="None"), :r_id]
+    @test GenX.ids_with_fuel(gen) == dfGen[(dfGen[!, :fuel] .!= "None"), :r_id]
     @test GenX.ids_with_positive(gen, GenX.co2_capture_fraction) ==
-          dfGen[dfGen.co2_capture_fraction.>0, :r_id]
-    @test GenX.ids_with_singlefuel(gen) == dfGen[dfGen.multi_fuels.!=1, :r_id]
-    @test GenX.ids_with_multifuels(gen) == dfGen[dfGen.multi_fuels.==1, :r_id]
+          dfGen[dfGen.co2_capture_fraction .> 0, :r_id]
+    @test GenX.ids_with_singlefuel(gen) == dfGen[dfGen.multi_fuels .!= 1, :r_id]
+    @test GenX.ids_with_multifuels(gen) == dfGen[dfGen.multi_fuels .== 1, :r_id]
     if !isempty(GenX.ids_with_multifuels(gen))
         MULTI_FUELS = GenX.ids_with_multifuels(gen)
         max_fuels = maximum(GenX.num_fuels.(gen))
-        for i = 1:max_fuels
+        for i in 1:max_fuels
             @test findall(g -> GenX.max_cofire_cols(g, tag = i) < 1, gen[MULTI_FUELS]) ==
-                  dfGen[dfGen[!, Symbol(string("fuel", i, "_max_cofire_level"))].<1, :][
+                  dfGen[dfGen[!, Symbol(string("fuel", i, "_max_cofire_level"))] .< 1, :][
                 !,
-                :r_id,
+                :r_id
             ]
             @test findall(
                 g -> GenX.max_cofire_start_cols(g, tag = i) < 1,
-                gen[MULTI_FUELS],
+                gen[MULTI_FUELS]
             ) == dfGen[
-                dfGen[!, Symbol(string("fuel", i, "_max_cofire_level_start"))].<1,
-                :,
+                dfGen[!, Symbol(string("fuel", i, "_max_cofire_level_start"))] .< 1,
+                :
             ][
                 !,
-                :r_id,
+                :r_id
             ]
             @test findall(g -> GenX.min_cofire_cols(g, tag = i) > 0, gen[MULTI_FUELS]) ==
-                  dfGen[dfGen[!, Symbol(string("fuel", i, "_min_cofire_level"))].>0, :][
+                  dfGen[dfGen[!, Symbol(string("fuel", i, "_min_cofire_level"))] .> 0, :][
                 !,
-                :r_id,
+                :r_id
             ]
             @test findall(
                 g -> GenX.min_cofire_start_cols(g, tag = i) > 0,
-                gen[MULTI_FUELS],
+                gen[MULTI_FUELS]
             ) == dfGen[
-                dfGen[!, Symbol(string("fuel", i, "_min_cofire_level_start"))].>0,
-                :,
+                dfGen[!, Symbol(string("fuel", i, "_min_cofire_level_start"))] .> 0,
+                :
             ][
                 !,
-                :r_id,
+                :r_id
             ]
             @test GenX.fuel_cols.(gen, tag = i) == dfGen[!, Symbol(string("fuel", i))]
             @test GenX.heat_rate_cols.(gen, tag = i) ==
@@ -148,7 +147,7 @@ function test_load_scaled_resources_data(gen, dfGen)
                   dfGen[!, Symbol(string("fuel", i, "_min_cofire_level_start"))]
         end
     end
-    @test GenX.ids_with_mga(gen) == dfGen[dfGen.mga.==1, :r_id]
+    @test GenX.ids_with_mga(gen) == dfGen[dfGen.mga .== 1, :r_id]
 
     @test GenX.region.(gen) == dfGen.region
     @test GenX.cluster.(gen) == dfGen.cluster
@@ -173,7 +172,6 @@ function test_add_modules_to_resources(gen, dfGen)
 end
 
 function test_inputs_keys(inputs, inputs_true)
-
     @test inputs["G"] == inputs_true["G"]
 
     @test inputs["HYDRO_RES"] == inputs_true["HYDRO_RES"]
@@ -221,18 +219,18 @@ function test_inputs_keys(inputs, inputs_true)
 end
 
 function test_resource_specific_attributes(gen, dfGen, inputs)
-    @test GenX.is_buildable(gen) == dfGen[dfGen.new_build.==1, :r_id]
-    @test GenX.is_retirable(gen) == dfGen[dfGen.can_retire.==1, :r_id]
+    @test GenX.is_buildable(gen) == dfGen[dfGen.new_build .== 1, :r_id]
+    @test GenX.is_retirable(gen) == dfGen[dfGen.can_retire .== 1, :r_id]
 
     rs = GenX.ids_with_positive(gen, GenX.max_cap_mwh)
-    @test rs == dfGen[dfGen.max_cap_mwh.>0, :r_id]
-    @test GenX.max_cap_mwh.(rs) == dfGen[dfGen.max_cap_mwh.>0, :r_id]
+    @test rs == dfGen[dfGen.max_cap_mwh .> 0, :r_id]
+    @test GenX.max_cap_mwh.(rs) == dfGen[dfGen.max_cap_mwh .> 0, :r_id]
     rs = GenX.ids_with_positive(gen, GenX.max_charge_cap_mw)
-    @test rs == dfGen[dfGen.max_charge_cap_mw.>0, :r_id]
-    @test GenX.max_charge_cap_mw.(rs) == dfGen[dfGen.max_charge_cap_mw.>0, :r_id]
+    @test rs == dfGen[dfGen.max_charge_cap_mw .> 0, :r_id]
+    @test GenX.max_charge_cap_mw.(rs) == dfGen[dfGen.max_charge_cap_mw .> 0, :r_id]
     rs = GenX.ids_with_unit_commitment(gen)
-    @test rs == dfGen[dfGen.therm.==1, :r_id]
-    @test GenX.cap_size.(gen[rs]) == dfGen[dfGen.therm.==1, :cap_size]
+    @test rs == dfGen[dfGen.therm .== 1, :r_id]
+    @test GenX.cap_size.(gen[rs]) == dfGen[dfGen.therm .== 1, :cap_size]
     rs = setdiff(inputs["HAS_FUEL"], inputs["THERM_COMMIT"])
     @test GenX.heat_rate_mmbtu_per_mwh.(gen[rs]) == dfGen[rs, :heat_rate_mmbtu_per_mwh]
     rs = setdiff(inputs["THERM_COMMIT"], inputs["THERM_COMMIT_PWFU"])
@@ -263,7 +261,7 @@ function test_load_resources_data()
         "ParameterScale" => 0,
         "OperationalReserves" => 1,
         "UCommit" => 2,
-        "MultiStage" => 1,
+        "MultiStage" => 1
     )
 
     # Merge the setup with the default settings
@@ -311,12 +309,11 @@ function test_load_resources_data()
 end
 
 function test_load_VRE_STOR_data()
-
     setup = Dict(
         "ParameterScale" => 0,
         "OperationalReserves" => 1,
         "UCommit" => 2,
-        "MultiStage" => 0,
+        "MultiStage" => 0
     )
 
     # Merge the setup with the default settings
@@ -340,41 +337,40 @@ function test_load_VRE_STOR_data()
     inputs = load(joinpath(test_path, "inputs_before_loadgen.jld2"))
     GenX.add_resources_to_input_data!(inputs, settings, test_path, gen)
 
-    @test GenX.vre_stor(gen) == dfGen[dfGen.vre_stor.==1, :r_id]
+    @test GenX.vre_stor(gen) == dfGen[dfGen.vre_stor .== 1, :r_id]
     sort!(dfVRE_STOR, :resource)
 
     rs = inputs["VRE_STOR"]
-    @test GenX.solar(gen) == dfVRE_STOR[dfVRE_STOR.solar.==1, :r_id]
-    @test GenX.wind(gen) == dfVRE_STOR[dfVRE_STOR.wind.==1, :r_id]
+    @test GenX.solar(gen) == dfVRE_STOR[dfVRE_STOR.solar .== 1, :r_id]
+    @test GenX.wind(gen) == dfVRE_STOR[dfVRE_STOR.wind .== 1, :r_id]
     @test GenX.storage_dc_discharge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.>=1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .>= 1, :r_id]
     @test GenX.storage_sym_dc_discharge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .== 1, :r_id]
     @test GenX.storage_asym_dc_discharge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.==2, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .== 2, :r_id]
 
-    @test GenX.storage_dc_charge(gen) == dfVRE_STOR[dfVRE_STOR.stor_dc_charge.>=1, :r_id]
+    @test GenX.storage_dc_charge(gen) == dfVRE_STOR[dfVRE_STOR.stor_dc_charge .>= 1, :r_id]
     @test GenX.storage_sym_dc_charge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_charge.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_charge .== 1, :r_id]
     @test GenX.storage_asym_dc_charge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_charge.==2, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_charge .== 2, :r_id]
 
     @test GenX.storage_ac_discharge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge.>=1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge .>= 1, :r_id]
     @test GenX.storage_sym_ac_discharge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge .== 1, :r_id]
     @test GenX.storage_asym_ac_discharge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge.==2, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge .== 2, :r_id]
 
-    @test GenX.storage_ac_charge(gen) == dfVRE_STOR[dfVRE_STOR.stor_ac_charge.>=1, :r_id]
+    @test GenX.storage_ac_charge(gen) == dfVRE_STOR[dfVRE_STOR.stor_ac_charge .>= 1, :r_id]
     @test GenX.storage_sym_ac_charge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_charge.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_charge .== 1, :r_id]
     @test GenX.storage_asym_ac_charge(gen) ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_charge.==2, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_charge .== 2, :r_id]
 
     @test GenX.technology.(gen[rs]) == dfVRE_STOR.technology
-    @test GenX.is_LDS_VRE_STOR(gen) == dfVRE_STOR[dfVRE_STOR.lds_vre_stor.!=0, :r_id]
-
+    @test GenX.is_LDS_VRE_STOR(gen) == dfVRE_STOR[dfVRE_STOR.lds_vre_stor .!= 0, :r_id]
 
     for attr in (
         :existing_cap_solar_mw,
@@ -383,7 +379,7 @@ function test_load_VRE_STOR_data()
         :existing_cap_charge_dc_mw,
         :existing_cap_charge_ac_mw,
         :existing_cap_discharge_dc_mw,
-        :existing_cap_discharge_ac_mw,
+        :existing_cap_discharge_ac_mw
     )
         test_macro_interface(attr, gen[rs], dfVRE_STOR)
         test_ids_with_nonneg(attr, gen[rs], dfVRE_STOR)
@@ -396,7 +392,7 @@ function test_load_VRE_STOR_data()
         :max_cap_charge_dc_mw,
         :max_cap_charge_ac_mw,
         :max_cap_discharge_dc_mw,
-        :max_cap_discharge_ac_mw,
+        :max_cap_discharge_ac_mw
     )
         test_macro_interface(attr, gen[rs], dfVRE_STOR)
         test_ids_with_nonneg(attr, gen[rs], dfVRE_STOR)
@@ -412,7 +408,7 @@ function test_load_VRE_STOR_data()
         :min_cap_discharge_dc_mw,
         :min_cap_discharge_ac_mw,
         :inverter_ratio_solar,
-        :inverter_ratio_wind,
+        :inverter_ratio_wind
     )
         test_macro_interface(attr, gen[rs], dfVRE_STOR)
         test_ids_with_positive(attr, gen[rs], dfVRE_STOR)
@@ -445,7 +441,7 @@ function test_load_VRE_STOR_data()
         :eff_up_dc,
         :eff_down_dc,
         :power_to_energy_ac,
-        :power_to_energy_dc,
+        :power_to_energy_dc
     )
         test_macro_interface(attr, gen[rs], dfVRE_STOR)
     end
@@ -465,162 +461,165 @@ function test_load_VRE_STOR_data()
     @test GenX.max_cap_wind.(gen[rs], tag = 1) == dfVRE_STOR.maxcaptagwind_1
 
     @test GenX.ids_with_policy(gen, GenX.min_cap_solar, tag = 1) ==
-          dfVRE_STOR[dfVRE_STOR.mincaptagsolar_1.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.mincaptagsolar_1 .== 1, :r_id]
     @test GenX.ids_with_policy(gen, GenX.min_cap_wind, tag = 1) ==
-          dfVRE_STOR[dfVRE_STOR.mincaptagwind_1.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.mincaptagwind_1 .== 1, :r_id]
     @test GenX.ids_with_policy(gen, GenX.min_cap_stor, tag = 1) ==
-          dfVRE_STOR[dfVRE_STOR.mincaptagstor_1.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.mincaptagstor_1 .== 1, :r_id]
     @test GenX.ids_with_policy(gen, GenX.max_cap_solar, tag = 1) ==
-          dfVRE_STOR[dfVRE_STOR.maxcaptagsolar_1.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.maxcaptagsolar_1 .== 1, :r_id]
     @test GenX.ids_with_policy(gen, GenX.max_cap_wind, tag = 1) ==
-          dfVRE_STOR[dfVRE_STOR.maxcaptagwind_1.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.maxcaptagwind_1 .== 1, :r_id]
     @test GenX.ids_with_policy(gen, GenX.max_cap_stor, tag = 1) ==
-          dfVRE_STOR[dfVRE_STOR.maxcaptagstor_1.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.maxcaptagstor_1 .== 1, :r_id]
 
     # inputs keys
-    @test inputs["VRE_STOR"] == dfGen[dfGen.vre_stor.==1, :r_id]
-    @test inputs["VS_SOLAR"] == dfVRE_STOR[(dfVRE_STOR.solar.!=0), :r_id]
-    @test inputs["VS_WIND"] == dfVRE_STOR[(dfVRE_STOR.wind.!=0), :r_id]
+    @test inputs["VRE_STOR"] == dfGen[dfGen.vre_stor .== 1, :r_id]
+    @test inputs["VS_SOLAR"] == dfVRE_STOR[(dfVRE_STOR.solar .!= 0), :r_id]
+    @test inputs["VS_WIND"] == dfVRE_STOR[(dfVRE_STOR.wind .!= 0), :r_id]
     @test inputs["VS_DC"] == union(
-        dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.>=1, :r_id],
-        dfVRE_STOR[dfVRE_STOR.stor_dc_charge.>=1, :r_id],
-        dfVRE_STOR[dfVRE_STOR.solar.!=0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .>= 1, :r_id],
+        dfVRE_STOR[dfVRE_STOR.stor_dc_charge .>= 1, :r_id],
+        dfVRE_STOR[dfVRE_STOR.solar .!= 0, :r_id]
     )
 
     @test inputs["VS_STOR"] == union(
-        dfVRE_STOR[dfVRE_STOR.stor_dc_charge.>=1, :r_id],
-        dfVRE_STOR[dfVRE_STOR.stor_ac_charge.>=1, :r_id],
-        dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.>=1, :r_id],
-        dfVRE_STOR[dfVRE_STOR.stor_ac_discharge.>=1, :r_id],
+        dfVRE_STOR[dfVRE_STOR.stor_dc_charge .>= 1, :r_id],
+        dfVRE_STOR[dfVRE_STOR.stor_ac_charge .>= 1, :r_id],
+        dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .>= 1, :r_id],
+        dfVRE_STOR[dfVRE_STOR.stor_ac_discharge .>= 1, :r_id]
     )
     STOR = inputs["VS_STOR"]
     @test inputs["VS_STOR_DC_DISCHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_dc_discharge.>=1), :r_id]
+          dfVRE_STOR[(dfVRE_STOR.stor_dc_discharge .>= 1), :r_id]
     @test inputs["VS_SYM_DC_DISCHARGE"] ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .== 1, :r_id]
     @test inputs["VS_ASYM_DC_DISCHARGE"] ==
-          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge.==2, :r_id]
-    @test inputs["VS_STOR_DC_CHARGE"] == dfVRE_STOR[(dfVRE_STOR.stor_dc_charge.>=1), :r_id]
-    @test inputs["VS_SYM_DC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_dc_charge.==1, :r_id]
-    @test inputs["VS_ASYM_DC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_dc_charge.==2, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_dc_discharge .== 2, :r_id]
+    @test inputs["VS_STOR_DC_CHARGE"] ==
+          dfVRE_STOR[(dfVRE_STOR.stor_dc_charge .>= 1), :r_id]
+    @test inputs["VS_SYM_DC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_dc_charge .== 1, :r_id]
+    @test inputs["VS_ASYM_DC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_dc_charge .== 2, :r_id]
     @test inputs["VS_STOR_AC_DISCHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_ac_discharge.>=1), :r_id]
+          dfVRE_STOR[(dfVRE_STOR.stor_ac_discharge .>= 1), :r_id]
     @test inputs["VS_SYM_AC_DISCHARGE"] ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge.==1, :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge .== 1, :r_id]
     @test inputs["VS_ASYM_AC_DISCHARGE"] ==
-          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge.==2, :r_id]
-    @test inputs["VS_STOR_AC_CHARGE"] == dfVRE_STOR[(dfVRE_STOR.stor_ac_charge.>=1), :r_id]
-    @test inputs["VS_SYM_AC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_ac_charge.==1, :r_id]
-    @test inputs["VS_ASYM_AC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_ac_charge.==2, :r_id]
-    @test inputs["VS_LDS"] == dfVRE_STOR[(dfVRE_STOR.lds_vre_stor.!=0), :r_id]
+          dfVRE_STOR[dfVRE_STOR.stor_ac_discharge .== 2, :r_id]
+    @test inputs["VS_STOR_AC_CHARGE"] ==
+          dfVRE_STOR[(dfVRE_STOR.stor_ac_charge .>= 1), :r_id]
+    @test inputs["VS_SYM_AC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_ac_charge .== 1, :r_id]
+    @test inputs["VS_ASYM_AC_CHARGE"] == dfVRE_STOR[dfVRE_STOR.stor_ac_charge .== 2, :r_id]
+    @test inputs["VS_LDS"] == dfVRE_STOR[(dfVRE_STOR.lds_vre_stor .!= 0), :r_id]
     @test inputs["VS_nonLDS"] == setdiff(STOR, inputs["VS_LDS"])
     @test inputs["VS_ASYM"] == union(
         inputs["VS_ASYM_DC_CHARGE"],
         inputs["VS_ASYM_DC_DISCHARGE"],
         inputs["VS_ASYM_AC_DISCHARGE"],
-        inputs["VS_ASYM_AC_CHARGE"],
+        inputs["VS_ASYM_AC_CHARGE"]
     )
     @test inputs["VS_SYM_DC"] ==
           intersect(inputs["VS_SYM_DC_CHARGE"], inputs["VS_SYM_DC_DISCHARGE"])
     @test inputs["VS_SYM_AC"] ==
           intersect(inputs["VS_SYM_AC_CHARGE"], inputs["VS_SYM_AC_DISCHARGE"])
 
-    buildable = dfGen[dfGen.new_build.==1, :r_id]
-    retirable = dfGen[dfGen.can_retire.==1, :r_id]
+    buildable = dfGen[dfGen.new_build .== 1, :r_id]
+    retirable = dfGen[dfGen.can_retire .== 1, :r_id]
     @test inputs["NEW_CAP_SOLAR"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.solar.!=0, :r_id],
-        dfVRE_STOR[dfVRE_STOR.max_cap_solar_mw.!=0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.solar .!= 0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.max_cap_solar_mw .!= 0, :r_id]
     )
     @test inputs["RET_CAP_SOLAR"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.solar.!=0, :r_id],
-        dfVRE_STOR[dfVRE_STOR.existing_cap_solar_mw.>=0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.solar .!= 0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_solar_mw .>= 0, :r_id]
     )
     @test inputs["NEW_CAP_WIND"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.wind.!=0, :r_id],
-        dfVRE_STOR[dfVRE_STOR.max_cap_wind_mw.!=0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.wind .!= 0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.max_cap_wind_mw .!= 0, :r_id]
     )
     @test inputs["RET_CAP_WIND"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.wind.!=0, :r_id],
-        dfVRE_STOR[dfVRE_STOR.existing_cap_wind_mw.>=0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.wind .!= 0, :r_id],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_wind_mw .>= 0, :r_id]
     )
     @test inputs["NEW_CAP_DC"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.max_cap_inverter_mw.!=0, :r_id],
-        inputs["VS_DC"],
+        dfVRE_STOR[dfVRE_STOR.max_cap_inverter_mw .!= 0, :r_id],
+        inputs["VS_DC"]
     )
     @test inputs["RET_CAP_DC"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.existing_cap_inverter_mw.>=0, :r_id],
-        inputs["VS_DC"],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_inverter_mw .>= 0, :r_id],
+        inputs["VS_DC"]
     )
     @test inputs["NEW_CAP_STOR"] ==
-          intersect(buildable, dfGen[dfGen.max_cap_mwh.!=0, :r_id], inputs["VS_STOR"])
+          intersect(buildable, dfGen[dfGen.max_cap_mwh .!= 0, :r_id], inputs["VS_STOR"])
     @test inputs["RET_CAP_STOR"] ==
-          intersect(retirable, dfGen[dfGen.existing_cap_mwh.>=0, :r_id], inputs["VS_STOR"])
+          intersect(
+        retirable, dfGen[dfGen.existing_cap_mwh .>= 0, :r_id], inputs["VS_STOR"])
     @test inputs["NEW_CAP_CHARGE_DC"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.max_cap_charge_dc_mw.!=0, :r_id],
-        inputs["VS_ASYM_DC_CHARGE"],
+        dfVRE_STOR[dfVRE_STOR.max_cap_charge_dc_mw .!= 0, :r_id],
+        inputs["VS_ASYM_DC_CHARGE"]
     )
     @test inputs["RET_CAP_CHARGE_DC"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.existing_cap_charge_dc_mw.>=0, :r_id],
-        inputs["VS_ASYM_DC_CHARGE"],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_charge_dc_mw .>= 0, :r_id],
+        inputs["VS_ASYM_DC_CHARGE"]
     )
     @test inputs["NEW_CAP_DISCHARGE_DC"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.max_cap_discharge_dc_mw.!=0, :r_id],
-        inputs["VS_ASYM_DC_DISCHARGE"],
+        dfVRE_STOR[dfVRE_STOR.max_cap_discharge_dc_mw .!= 0, :r_id],
+        inputs["VS_ASYM_DC_DISCHARGE"]
     )
     @test inputs["RET_CAP_DISCHARGE_DC"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.existing_cap_discharge_dc_mw.>=0, :r_id],
-        inputs["VS_ASYM_DC_DISCHARGE"],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_discharge_dc_mw .>= 0, :r_id],
+        inputs["VS_ASYM_DC_DISCHARGE"]
     )
     @test inputs["NEW_CAP_CHARGE_AC"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.max_cap_charge_ac_mw.!=0, :r_id],
-        inputs["VS_ASYM_AC_CHARGE"],
+        dfVRE_STOR[dfVRE_STOR.max_cap_charge_ac_mw .!= 0, :r_id],
+        inputs["VS_ASYM_AC_CHARGE"]
     )
     @test inputs["RET_CAP_CHARGE_AC"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.existing_cap_charge_ac_mw.>=0, :r_id],
-        inputs["VS_ASYM_AC_CHARGE"],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_charge_ac_mw .>= 0, :r_id],
+        inputs["VS_ASYM_AC_CHARGE"]
     )
     @test inputs["NEW_CAP_DISCHARGE_AC"] == intersect(
         buildable,
-        dfVRE_STOR[dfVRE_STOR.max_cap_discharge_ac_mw.!=0, :r_id],
-        inputs["VS_ASYM_AC_DISCHARGE"],
+        dfVRE_STOR[dfVRE_STOR.max_cap_discharge_ac_mw .!= 0, :r_id],
+        inputs["VS_ASYM_AC_DISCHARGE"]
     )
     @test inputs["RET_CAP_DISCHARGE_AC"] == intersect(
         retirable,
-        dfVRE_STOR[dfVRE_STOR.existing_cap_discharge_ac_mw.>=0, :r_id],
-        inputs["VS_ASYM_AC_DISCHARGE"],
+        dfVRE_STOR[dfVRE_STOR.existing_cap_discharge_ac_mw .>= 0, :r_id],
+        inputs["VS_ASYM_AC_DISCHARGE"]
     )
     @test inputs["RESOURCE_NAMES_VRE_STOR"] ==
           collect(skipmissing(dfVRE_STOR[!, :resource][1:size(inputs["VRE_STOR"])[1]]))
-    @test inputs["RESOURCE_NAMES_SOLAR"] == dfVRE_STOR[(dfVRE_STOR.solar.!=0), :resource]
-    @test inputs["RESOURCE_NAMES_WIND"] == dfVRE_STOR[(dfVRE_STOR.wind.!=0), :resource]
+    @test inputs["RESOURCE_NAMES_SOLAR"] == dfVRE_STOR[(dfVRE_STOR.solar .!= 0), :resource]
+    @test inputs["RESOURCE_NAMES_WIND"] == dfVRE_STOR[(dfVRE_STOR.wind .!= 0), :resource]
     @test inputs["RESOURCE_NAMES_DC_DISCHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_dc_discharge.!=0), :resource]
+          dfVRE_STOR[(dfVRE_STOR.stor_dc_discharge .!= 0), :resource]
     @test inputs["RESOURCE_NAMES_AC_DISCHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_ac_discharge.!=0), :resource]
+          dfVRE_STOR[(dfVRE_STOR.stor_ac_discharge .!= 0), :resource]
     @test inputs["RESOURCE_NAMES_DC_CHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_dc_charge.!=0), :resource]
+          dfVRE_STOR[(dfVRE_STOR.stor_dc_charge .!= 0), :resource]
     @test inputs["RESOURCE_NAMES_AC_CHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_ac_charge.!=0), :resource]
-    @test inputs["ZONES_SOLAR"] == dfVRE_STOR[(dfVRE_STOR.solar.!=0), :zone]
-    @test inputs["ZONES_WIND"] == dfVRE_STOR[(dfVRE_STOR.wind.!=0), :zone]
+          dfVRE_STOR[(dfVRE_STOR.stor_ac_charge .!= 0), :resource]
+    @test inputs["ZONES_SOLAR"] == dfVRE_STOR[(dfVRE_STOR.solar .!= 0), :zone]
+    @test inputs["ZONES_WIND"] == dfVRE_STOR[(dfVRE_STOR.wind .!= 0), :zone]
     @test inputs["ZONES_DC_DISCHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_dc_discharge.!=0), :zone]
+          dfVRE_STOR[(dfVRE_STOR.stor_dc_discharge .!= 0), :zone]
     @test inputs["ZONES_AC_DISCHARGE"] ==
-          dfVRE_STOR[(dfVRE_STOR.stor_ac_discharge.!=0), :zone]
-    @test inputs["ZONES_DC_CHARGE"] == dfVRE_STOR[(dfVRE_STOR.stor_dc_charge.!=0), :zone]
-    @test inputs["ZONES_AC_CHARGE"] == dfVRE_STOR[(dfVRE_STOR.stor_ac_charge.!=0), :zone]
+          dfVRE_STOR[(dfVRE_STOR.stor_ac_discharge .!= 0), :zone]
+    @test inputs["ZONES_DC_CHARGE"] == dfVRE_STOR[(dfVRE_STOR.stor_dc_charge .!= 0), :zone]
+    @test inputs["ZONES_AC_CHARGE"] == dfVRE_STOR[(dfVRE_STOR.stor_ac_charge .!= 0), :zone]
 end
 
 with_logger(ConsoleLogger(stderr, Logging.Warn)) do
