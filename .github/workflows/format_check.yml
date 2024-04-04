@@ -1,7 +1,7 @@
 name: Format check
 on:
   schedule:
-    - cron: "*/15 * * * *" # Run at 12:21am US Eastern time
+    - cron: "0 0 * * *" # Run at 12:21am US Eastern time
 
 jobs:
   formatter:
