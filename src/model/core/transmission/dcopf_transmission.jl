@@ -32,7 +32,7 @@ function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
     ### DC-OPF variables ###
 
     # Voltage angle variables of each zone "z" at hour "t" 
-    @variable(EP, vANGLE[z = 1:Z, t = 1:T])
+    @variable(EP, vANGLE[z = 1:Z, t =       1:T])
 
     ### DC-OPF constraints ###
 
