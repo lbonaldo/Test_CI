@@ -13,8 +13,8 @@ end
 Base.showerror(io::IO, e::CSVFileNotFound) = print(io, e.filefullpath, " not found")
 
 function run_genx_case_testing(test_path::AbstractString,
-    test_setup::Dict,
-    optimizer::Any = HiGHS.Optimizer)
+        test_setup::Dict,
+        optimizer::Any = HiGHS.Optimizer)
     # Merge the genx_setup with the default settings
     settings = GenX.default_settings()
     merge!(settings, test_setup)
@@ -34,8 +34,8 @@ function run_genx_case_testing(test_path::AbstractString,
 end
 
 function run_genx_case_conflict_testing(test_path::AbstractString,
-    test_setup::Dict,
-    optimizer::Any = HiGHS.Optimizer)
+        test_setup::Dict,
+        optimizer::Any = HiGHS.Optimizer)
 
     # Merge the genx_setup with the default settings
     settings = GenX.default_settings()
@@ -55,8 +55,8 @@ function run_genx_case_conflict_testing(test_path::AbstractString,
 end
 
 function run_genx_case_simple_testing(test_path::AbstractString,
-    genx_setup::Dict,
-    optimizer::Any)
+        genx_setup::Dict,
+        optimizer::Any)
     # Run the case
     OPTIMIZER = configure_solver(test_path, optimizer)
     inputs = load_inputs(genx_setup, test_path)
@@ -66,8 +66,8 @@ function run_genx_case_simple_testing(test_path::AbstractString,
 end
 
 function run_genx_case_multistage_testing(test_path::AbstractString,
-    genx_setup::Dict,
-    optimizer::Any)
+        genx_setup::Dict,
+        optimizer::Any)
     # Run the case
     OPTIMIZER = configure_solver(test_path, optimizer)
 
@@ -95,8 +95,8 @@ function run_genx_case_multistage_testing(test_path::AbstractString,
 end
 
 function write_testlog(test_path::AbstractString,
-    message::AbstractString,
-    test_result::TestResult)
+        message::AbstractString,
+        test_result::TestResult)
     # Save the results to a log file
     # Format: datetime, message, test result
 
@@ -119,9 +119,9 @@ function write_testlog(test_path::AbstractString,
 end
 
 function write_testlog(test_path::AbstractString,
-    obj_test::Real,
-    optimal_tol::Real,
-    test_result::TestResult)
+        obj_test::Real,
+        optimal_tol::Real,
+        test_result::TestResult)
     # Save the results to a log file
     # Format: datetime, objective value ± tolerance, test result
     message = "$obj_test ± $optimal_tol"
@@ -129,9 +129,9 @@ function write_testlog(test_path::AbstractString,
 end
 
 function write_testlog(test_path::AbstractString,
-    obj_test::Vector{<:Real},
-    optimal_tol::Vector{<:Real},
-    test_result::TestResult)
+        obj_test::Vector{<:Real},
+        optimal_tol::Vector{<:Real},
+        test_result::TestResult)
     # Save the results to a log file
     # Format: datetime, [objective value ± tolerance], test result
     @assert length(obj_test) == length(optimal_tol)
