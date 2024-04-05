@@ -124,9 +124,9 @@ function write_capacity_value(path::AbstractString, inputs::Dict, setup::Dict, E
             Reserve = fill(Symbol("CapRes_$i"), G))
         temp_dfCapValue = hcat(temp_dfCapValue, DataFrame(capvalue, :auto))
         auxNew_Names = [Symbol("Resource");
-            Symbol("Zone");
-            Symbol("Reserve");
-            [Symbol("t$t") for t in 1:T]]
+                        Symbol("Zone");
+                        Symbol("Reserve");
+                        [Symbol("t$t") for t in 1:T]]
         rename!(temp_dfCapValue, auxNew_Names)
         append!(dfCapValue, temp_dfCapValue)
     end
@@ -148,9 +148,9 @@ be calculated only if `WriteShadowPrices` is activated.
     Returns a vector, with units of $/MW
 """
 function capacity_reserve_margin_price(EP::Model,
-    inputs::Dict,
-    setup::Dict,
-    capres_zone::Int)::Vector{Float64}
+        inputs::Dict,
+        setup::Dict,
+        capres_zone::Int)::Vector{Float64}
     ω = inputs["omega"]
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
     return dual.(EP[:cCapacityResMargin][capres_zone, :]) ./ ω * scale_factor

@@ -332,9 +332,9 @@ inputs:
   * settings\_d - Dictionary containing settings configured in the GenX settings genx\_settings.yml file as well as the multi-stage settings file multi\_stage\_settings.yml.
 """
 function write_multi_stage_outputs(stats_d::Dict,
-    outpath::String,
-    settings_d::Dict,
-    inputs_dict::Dict)
+        outpath::String,
+        settings_d::Dict,
+        inputs_dict::Dict)
     multi_stage_settings_d = settings_d["MultiStageSettingsDict"]
 
     write_multi_stage_capacities_discharge(outpath, multi_stage_settings_d)
@@ -362,9 +362,9 @@ inputs:
 returns: JuMP model with updated linking constraints.
 """
 function fix_initial_investments(EP_prev::Model,
-    EP_cur::Model,
-    start_cap_d::Dict,
-    inputs_d::Dict)
+        EP_cur::Model,
+        start_cap_d::Dict,
+        inputs_d::Dict)
     ALL_CAP = union(inputs_d["RET_CAP"], inputs_d["NEW_CAP"]) # Set of all resources subject to inter-stage capacity tracking
 
     # start_cap_d dictionary contains the starting capacity expression name (e) as a key,
@@ -401,9 +401,9 @@ inputs:
 returns: JuMP model with updated linking constraints.
 """
 function fix_capacity_tracking(EP_prev::Model,
-    EP_cur::Model,
-    cap_track_d::Dict,
-    cur_stage::Int)
+        EP_cur::Model,
+        cap_track_d::Dict,
+        cur_stage::Int)
 
     # cap_track_d dictionary contains the endogenous retirement tracking array variable name (v) as a key,
     # and the associated linking constraint name (c) as a value
@@ -517,9 +517,9 @@ inputs:
 returns: JuMP expression representing a sum of Benders cuts for linking capacity investment variables to be added to the cost-to-go function.
 """
 function generate_cut_component_track(EP_cur::Model,
-    EP_next::Model,
-    var_name::Symbol,
-    constr_name::Symbol)
+        EP_next::Model,
+        var_name::Symbol,
+        constr_name::Symbol)
     next_dual_value = Float64[]
     cur_inv_value = Float64[]
     cur_inv_var = []
@@ -560,9 +560,9 @@ inputs:
 returns: JuMP expression representing a sum of Benders cuts for linking capacity investment variables to be added to the cost-to-go function.
 """
 function generate_cut_component_inv(EP_cur::Model,
-    EP_next::Model,
-    expr_name::Symbol,
-    constr_name::Symbol)
+        EP_next::Model,
+        expr_name::Symbol,
+        constr_name::Symbol)
     next_dual_value = Float64[]
     cur_inv_value = Float64[]
     cur_inv_var = []

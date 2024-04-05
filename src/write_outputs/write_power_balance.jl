@@ -33,7 +33,8 @@ function write_power_balance(path::AbstractString, inputs::Dict, setup::Dict, EP
             powerbalance[(z - 1) * L + 2, :] = sum(value.(EP[:vP][STOR_ALL_ZONE, :]),
                 dims = 1)
             powerbalance[(z - 1) * L + 3, :] = (-1) *
-                                               sum((value.(EP[:vCHARGE][STOR_ALL_ZONE,
+                                               sum(
+                (value.(EP[:vCHARGE][STOR_ALL_ZONE,
                     :]).data),
                 dims = 1)
         end
@@ -42,13 +43,15 @@ function write_power_balance(path::AbstractString, inputs::Dict, setup::Dict, EP
             powerbalance[(z - 1) * L + 2, :] = sum(value.(EP[:vP][VS_ALL_ZONE, :]),
                 dims = 1)
             powerbalance[(z - 1) * L + 3, :] = (-1) *
-                                               sum(value.(EP[:vCHARGE_VRE_STOR][VS_ALL_ZONE,
+                                               sum(
+                value.(EP[:vCHARGE_VRE_STOR][VS_ALL_ZONE,
                     :]).data,
                 dims = 1)
         end
         if !isempty(intersect(resources_in_zone_by_rid(gen, z), FLEX))
             FLEX_ZONE = intersect(resources_in_zone_by_rid(gen, z), FLEX)
-            powerbalance[(z - 1) * L + 4, :] = sum((value.(EP[:vCHARGE_FLEX][FLEX_ZONE,
+            powerbalance[(z - 1) * L + 4, :] = sum(
+                (value.(EP[:vCHARGE_FLEX][FLEX_ZONE,
                     :]).data),
                 dims = 1)
             powerbalance[(z - 1) * L + 5, :] = (-1) *
@@ -67,7 +70,8 @@ function write_power_balance(path::AbstractString, inputs::Dict, setup::Dict, EP
         if !isempty(ELECTROLYZER)
             ELECTROLYZER_ZONE = intersect(resources_in_zone_by_rid(gen, z), ELECTROLYZER)
             powerbalance[(z - 1) * L + 11, :] = (-1) *
-                                                sum(value.(EP[:vUSE][ELECTROLYZER_ZONE,
+                                                sum(
+                value.(EP[:vUSE][ELECTROLYZER_ZONE,
                     :].data),
                 dims = 1)
         end
@@ -82,9 +86,9 @@ function write_power_balance(path::AbstractString, inputs::Dict, setup::Dict, EP
     else # setup["WriteOutputs"] == "full"	
         dfPowerBalance = hcat(dfPowerBalance, DataFrame(powerbalance, :auto))
         auxNew_Names = [Symbol("BalanceComponent");
-            Symbol("Zone");
-            Symbol("AnnualSum");
-            [Symbol("t$t") for t in 1:T]]
+                        Symbol("Zone");
+                        Symbol("AnnualSum");
+                        [Symbol("t$t") for t in 1:T]]
         rename!(dfPowerBalance, auxNew_Names)
         CSV.write(joinpath(path, "power_balance.csv"),
             dftranspose(dfPowerBalance, false),
