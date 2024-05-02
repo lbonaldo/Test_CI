@@ -68,8 +68,7 @@ function curtailable_variable_renewable!(EP::Model, inputs::Dict, setup::Dict)
             # Note: inequality constraint allows curtailment of output below maximum level.
             @constraint(EP,
                 [t = 1:T],
-                EP[:vP][y,
-                    t]<=sum(inputs["pP_Max"][yy, t] * EP[:eTotalCap][yy]
+                EP[:vP][y,t]<=sum(inputs["pP_Max"][yy, t] * EP[:eTotalCap][yy]
                 for yy in VRE_BINS))
         end
     end
