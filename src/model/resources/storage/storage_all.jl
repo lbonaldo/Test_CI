@@ -50,9 +50,8 @@ function storage_all!(EP::Model, inputs::Dict, setup::Dict)
     @expression(EP,
         eELOSS[y in STOR_ALL],
         sum(inputs["omega"][t] * EP[:vCHARGE][y, t]
-        for t in 1:T)-sum(inputs["omega"][t] *
-                          EP[:vP][y, t]
-        for t in 1:T))
+        for t in 1:T)-
+        sum(inputs["omega"][t] * EP[:vP][y, t] for t in 1:T))
 
     ## Objective Function Expressions ##
 
