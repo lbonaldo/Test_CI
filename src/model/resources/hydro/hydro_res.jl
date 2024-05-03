@@ -126,8 +126,8 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
     @constraint(EP,
         cHydroReservoirStart[y in CONSTRAINTSET, t in START_SUBPERIODS],
         EP[:vS_HYDRO][y,t]==EP[:vS_HYDRO][y, hoursbefore(p, t, 1)] -
-                (1 / efficiency_down(gen[y]) * EP[:vP][y, t]) - vSPILL[y, t] +
-                inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
+            (1 / efficiency_down(gen[y]) * EP[:vP][y, t]) - vSPILL[y, t] +
+            inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
 
     ### Constraints commmon to all reservoir hydro (y in set HYDRO_RES) ###
     @constraints(EP,
