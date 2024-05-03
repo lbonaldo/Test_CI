@@ -744,9 +744,7 @@ function no_unit_commitment(rs::Vector{T}) where {T <: AbstractResource}
 end
 
 # Operational Reserves
-function ids_with_regulation_reserve_requirements(rs::Vector{
-        T,
-}) where {T <: AbstractResource}
+function ids_with_regulation_reserve_requirements(rs::Vector{T}) where {T <: AbstractResource}
     findall(r -> reg_max(r) > 0, rs)
 end
 function ids_with_spinning_reserve_requirements(rs::Vector{T}) where {T <: AbstractResource}
