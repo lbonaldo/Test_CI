@@ -230,15 +230,13 @@ function thermal_commit!(EP::Model, inputs::Dict, setup::Dict)
     Up_Time = zeros(Int, G)
     Up_Time[THERM_COMMIT] .= Int.(floor.(up_time.(gen[THERM_COMMIT])))
     @constraint(EP, [y in THERM_COMMIT, t in 1:T],
-        EP[:vCOMMIT][y,
-            t]>=sum(EP[:vSTART][y, u] for u in hoursbefore(p, t, 0:(Up_Time[y] - 1))))
+        EP[:vCOMMIT][y,t]>=sum(EP[:vSTART][y, u] for u in hoursbefore(p, t, 0:(Up_Time[y] - 1))))
 
     Down_Time = zeros(Int, G)
     Down_Time[THERM_COMMIT] .= Int.(floor.(down_time.(gen[THERM_COMMIT])))
     @constraint(EP, [y in THERM_COMMIT, t in 1:T],
-        EP[:eTotalCap][y] / cap_size(gen[y]) -
-        EP[:vCOMMIT][y,
-            t]>=sum(EP[:vSHUT][y, u] for u in hoursbefore(p, t, 0:(Down_Time[y] - 1))))
+        EP[:eTotalCap][y] / cap_size(gen[y]) - EP[:vCOMMIT][y,t] >=
+        sum(EP[:vSHUT][y, u] for u in hoursbefore(p, t, 0:(Down_Time[y] - 1))))
 
     ## END Constraints for thermal units subject to integer (discrete) unit commitment decisions
     if !isempty(ids_with_maintenance(gen))
