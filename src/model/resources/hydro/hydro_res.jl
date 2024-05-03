@@ -125,9 +125,9 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
 
     @constraint(EP,
         cHydroReservoirStart[y in CONSTRAINTSET, t in START_SUBPERIODS],
-        EP[:vS_HYDRO][y,t]==EP[:vS_HYDRO][y, hoursbefore(p, t, 1)] -
+        EP[:vS_HYDRO][y, t] == (EP[:vS_HYDRO][y, hoursbefore(p, t, 1)] -
             (1 / efficiency_down(gen[y]) * EP[:vP][y, t]) - vSPILL[y, t] +
-            inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
+            inputs["pP_Max"][y, t] * EP[:eTotalCap][y]))
 
     ### Constraints commmon to all reservoir hydro (y in set HYDRO_RES) ###
     @constraints(EP,
@@ -140,8 +140,8 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
             # Constraints for reservoir hydro
             cHydroReservoirInterior[y in HYDRO_RES, t in INTERIOR_SUBPERIODS],
             EP[:vS_HYDRO][y, t] == (EP[:vS_HYDRO][y, hoursbefore(p, t, 1)] -
-                (1 / efficiency_down(gen[y]) * EP[:vP][y, t]) - vSPILL[y, t] +
-                inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
+             (1 / efficiency_down(gen[y]) * EP[:vP][y, t]) - vSPILL[y, t] +
+             inputs["pP_Max"][y, t] * EP[:eTotalCap][y])
 
             # Maximum ramp up and down
             cRampUp[y in HYDRO_RES, t in 1:T],
@@ -163,7 +163,7 @@ function hydro_res!(EP::Model, inputs::Dict, setup::Dict)
             # DEV NOTE: We do not currently account for hydro power plant outages - leave it for later to figure out if we should.
             # DEV NOTE (CONTD): If we defin pPMax as hourly availability of the plant and define inflows as a separate parameter, then notation will be consistent with its use for other resources
             cHydroMaxPower[y in HYDRO_RES, t in 1:T], EP[:vP][y, t] <= EP[:eTotalCap][y]
-            
+
             cHydroMaxOutflow[y in HYDRO_RES, t in 1:T],
             EP[:vP][y, t] <= EP[:vS_HYDRO][y, hoursbefore(p, t, 1)]
         end)
