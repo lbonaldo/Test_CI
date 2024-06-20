@@ -1,0 +1,41 @@
+name: PR Check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+jobs:
+  # Enforces the update of a changelog file on every pull request
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dangoslen/changelog-enforcer@v3
+        with:
+          changeLogPath: 'CHANGELOG.md'
+          skipLabels: 'skip changelog'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          missingUpdateErrorMessage: >
+            No update to CHANGELOG.md found! Please add a changelog entry
+            describing your change with a link to the issue or pull request.
+            Please note that the keepachangelog (https://keepachangelog.com)
+            format is used. If your change is not applicable for a changelog
+            entry (e.g. it ONLY affects documentation or the testsuite),
+            add the 'skip changelog' label to the pull request to skip the
+            changelog enforcer.
+
+# Check if the version number in the Project.toml file is updated
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check version number
+        run: |
+          vdiff=$(git diff -U0 origin/develop -- Project.toml | grep -E "^\+" | grep "version =")
+          if [ -z "$vdiff" ];
+          then
+            echo "Project.toml has not been updated"
+            exit 1
+          else
+            echo "Project.toml has been updated"
+            echo "New version number:" ${vdiff:1}
+          fi
