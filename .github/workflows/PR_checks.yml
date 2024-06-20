@@ -23,7 +23,7 @@ jobs:
             add the 'skip changelog' label to the pull request to skip the
             changelog enforcer.
 
-# Check if the version number in the Project.toml file is updated
+  # Check if the version number in the Project.toml file is updated
   version:
     runs-on: ubuntu-latest
     steps:
