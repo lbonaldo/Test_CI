@@ -29,9 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check version number
+        if: github.event.pull_request.base.ref == 'develop'
         shell: bash {0}
         run: |
-          echo ${{ github.base_ref }}
           git fetch origin &> /dev/null
           vdiff=$(git diff -U0 origin/${{ github.base_ref }} -- Project.toml | grep -E "^\+" | grep "version =")
           if [ -z "$vdiff" ];
