@@ -31,8 +31,8 @@ jobs:
       - name: Check version number
         shell: bash {0}
         run: |
-          git fetch origin develop &> /dev/null
-          vdiff=$(git diff -U0 origin/develop -- Project.toml | grep -E "^\+" | grep "version =")
+          git fetch origin &> /dev/null
+          vdiff=$(git diff -U0 origin/{{ github.base_ref }} -- Project.toml | grep -E "^\+" | grep "version =")
           if [ -z "$vdiff" ];
           then
             echo "Warning: version number in Project.toml has not been updated"
