@@ -29,13 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check version number
+        shell: bash {0}
         run: |
           git fetch origin
           vdiff=$(git diff -U0 origin/develop -- Project.toml | grep -E "^\+" | grep "version =")
           if [ -z "$vdiff" ];
           then
             echo "Project.toml has not been updated"
-            exit 1
+            exit 10
           else
             echo "Project.toml has been updated"
             echo "New version number:" ${vdiff:1}
