@@ -6,6 +6,7 @@ channels:
 dependencies:
   - python=3.10
   - pip
+  - git 
   - pandas=1.5
   - numpy
   - scipy
@@ -14,7 +15,7 @@ dependencies:
   - matplotlib
   - click
   - sphinx_rtd_theme
-  - xlwings
+  - xlwings=0.30.15
   - conda-forge::numpy-financial
   - conda-forge::pint
   - conda-forge::toml
