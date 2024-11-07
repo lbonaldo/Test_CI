@@ -1,0 +1,76 @@
+name: Version Check Status
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  verify-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Set up Julia
+      uses: julia-actions/setup-julia@v1
+      with:
+        version: '1.x'
+        
+    - uses: julia-actions/cache@v2
+        
+    - name: Verify Version Update
+      run: |
+        julia -e '
+        function parse_version(version_str)
+            # Extract M.m.p and optional dev number
+            base_pattern = r"^(\d+\.\d+\.\d+)(?:-dev\.(\d+))?$"
+            m = match(base_pattern, version_str)
+            if isnothing(m)
+                error("Invalid version format: $version_str")
+            end
+            
+            version = m.captures[1]
+            dev_num = isnothing(m.captures[2]) ? nothing : parse(Int, m.captures[2])
+            return (version, dev_num)
+        end
+
+        function should_update_version(base_ver_str, current_ver_str)
+            base_ver, base_dev = parse_version(base_ver_str)
+            current_ver, current_dev = parse_version(current_ver_str)
+            
+            # If versions differ, no update needed
+            if base_ver != current_ver
+                return false
+            end
+            
+            # If base has dev number, we should increment from the base dev number
+            if !isnothing(base_dev)
+                return true
+            end
+            
+            # If base has no dev number and current has none, add dev.1
+            if isnothing(base_dev) && isnothing(current_dev)
+                return true
+            end
+            
+            return false
+        end
+
+        # Get the base branch version
+        base_content = read(pipeline(`git show origin/${{ github.base_ref }}:Project.toml`), String)
+        # Get current branch version
+        current_content = read("Project.toml", String)
+        
+        # Extract versions using regex
+        version_pattern = r"version = \"(.*?)\""
+        base_version = match(version_pattern, base_content).captures[1]
+        current_version = match(version_pattern, current_content).captures[1]
+        
+        if should_update_version(base_version, current_version)
+            error("Version needs to be updated before merging")
+        else
+            println("Version is properly updated")
+            println("Current version: $current_version")
+        end'

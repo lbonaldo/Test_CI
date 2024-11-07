@@ -1,0 +1,135 @@
+name: Version Check and Update
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+# Check if the version number in the Project.toml file is updated
+# If not, update it to the next development version
+jobs:
+  CheckVersion:
+    # Only run if the review was approved
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - name: Check if PR is ready to merge
+      run: |
+        # Check if PR has required approvals using GitHub API
+        PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews")
+        
+        APPROVED_COUNT=$(echo $PR_DATA | jq '[.[] | select(.state == "APPROVED")] | length')
+        if [ $APPROVED_COUNT -lt 1 ]; then
+          echo "Not enough approvals to proceed"
+          exit 1
+        fi
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ github.head_ref }}
+        
+    - name: Set up Julia
+      uses: julia-actions/setup-julia@v1
+      with:
+        version: '1.x'
+        
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "actions@github.com"
+        
+    - uses: julia-actions/cache@v2
+    - name: Check and Update Version
+      run: |
+        julia -e '
+        function parse_version(version_str)
+            # Extract M.m.p and optional dev number
+            base_pattern = r"^(\d+\.\d+\.\d+)(?:-dev\.(\d+))?$"
+            m = match(base_pattern, version_str)
+            if isnothing(m)
+                error("Invalid version format: $version_str")
+            end
+            
+            version = m.captures[1]
+            dev_num = isnothing(m.captures[2]) ? nothing : parse(Int, m.captures[2])
+            return (version, dev_num)
+        end
+
+        function should_update_version(base_ver_str, current_ver_str)
+            base_ver, base_dev = parse_version(base_ver_str)
+            current_ver, current_dev = parse_version(current_ver_str)
+            
+            # If versions differ, no update needed
+            if base_ver != current_ver
+                return false
+            end
+            
+            # If base has dev number, we should increment from the base dev number
+            if !isnothing(base_dev)
+                return true
+            end
+            
+            # If base has no dev number and current has none, add dev.1
+            if isnothing(base_dev) && isnothing(current_dev)
+                return true
+            end
+            
+            return false
+        end
+
+        function get_new_version(base_ver_str, current_ver_str)
+            base_ver, base_dev = parse_version(base_ver_str)
+            current_ver, current_dev = parse_version(current_ver_str)
+            
+            # If base has a dev number, increment from that
+            if !isnothing(base_dev)
+                return "$(base_ver)-dev.$(base_dev + 1)"
+            end
+            
+            # If no dev numbers exist, start with dev.1
+            return "$(current_ver)-dev.1"
+        end
+
+        function check_and_update_version()
+            # Get the base branch version
+            base_content = read(pipeline(`git show origin/${{ github.base_ref }}:Project.toml`), String)
+            # Get current branch version
+            current_content = read("Project.toml", String)
+            
+            # Extract versions using regex
+            version_pattern = r"version = \"(.*?)\""
+            base_version = match(version_pattern, base_content).captures[1]
+            current_version = match(version_pattern, current_content).captures[1]
+            
+            println("Base version: $base_version")
+            println("Current version: $current_version")
+            
+            if should_update_version(base_version, current_version)
+                println("Version needs updating")
+                
+                new_version = get_new_version(base_version, current_version)
+                
+                # Update the file
+                new_content = replace(current_content, 
+                    "version = \"$current_version\"" => 
+                    "version = \"$new_version\"")
+                
+                write("Project.toml", new_content)
+                
+                # Commit and push the change
+                run(`git add Project.toml`)
+                run(`git commit -m "Bump version to $new_version"`)
+                run(`git push`)
+                
+                println("Version updated to $new_version")
+            else
+                println("Version already updated")
+            end
+        end
+        
+        check_and_update_version()'

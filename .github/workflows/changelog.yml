@@ -1,4 +1,4 @@
-name: PR Check
+name: Changelog Enforcer
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
@@ -20,23 +20,3 @@ jobs:
             the keepachangelog format (https://keepachangelog.com). If your 
             change doesn’t require a changelog entry, please add the 
             'Skip-Changelog' label to the pull request.
-
-  # Check if the version number in the Project.toml file is updated
-  Version:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check version number
-        if: github.event.pull_request.base.ref == 'develop'
-        shell: bash {0}
-        run: |
-          git fetch origin develop &> /dev/null
-          vdiff=$(git diff -U0 origin/develop -- Project.toml | grep -E "^\+" | grep "version =")
-          if [ -z "$vdiff" ];
-          then
-            echo "::error::Error: version number in Project.toml has not been updated." && exit 1
-
-          else
-            echo "Version number in Project.toml has been updated."
-            echo "New" ${vdiff:1}
-          fi
