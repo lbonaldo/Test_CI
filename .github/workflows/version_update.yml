@@ -2,8 +2,6 @@ name: Version Check and Update
 
 on:
   pull_request_review:
-    branches:
-      - develop
     types: [submitted]
 
 jobs:
