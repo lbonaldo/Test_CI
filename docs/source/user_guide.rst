@@ -26,9 +26,13 @@ Princeton University
 
 Suggestion Citations
 --------------------
-C. Farid, H. Luo, A. Gunawan, A. Pascale, and E. Larson, "EnergyPATHWAYS Model User Guide, Revision 1," Andlinger Center for Energy and the Environment, Princeton University, August 1, 2024. (:download:`pdf <../EnergyPATHWAYS_User_Guide_August_2024.pdf>`)
+This manual:
 
-Davis, Dominic, Andrew C. Pascale, Bishal Bharadaj, Richard Bolt, Michael Brear, Brendan Cullen, Robin Batterham, et al. Net Zero Australia - Slide Pack and Input Data (Updated Version). Data Collection. The University of Queensland, 2024. \https://doi.org/10.48610/e32f6e5.
+* \C. Farid, H. Luo, A. Gunawan, A. Pascale, and E. Larson, "EnergyPATHWAYS Model User Guide, Revision 1," Andlinger Center for Energy and the Environment, Princeton University, August 1, 2024. (:download:`pdf <../EnergyPATHWAYS_User_Guide_August_2024.pdf>`)
+
+Test EP database for Australia:
+
+* Davis, Dominic, Andrew C. Pascale, Bishal Bharadaj, Richard Bolt, Michael Brear, Brendan Cullen, Robin Batterham, et al. Net Zero Australia - Slide Pack and Input Data (Updated Version). Data Collection. The University of Queensland, 2024. \https://doi.org/10.48610/e32f6e5.
 
 Last updated
 ------------
