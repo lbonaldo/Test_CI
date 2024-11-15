@@ -1,4 +1,4 @@
-name: Build EP User Guide
+name: Build EP Documentation
 
 on:
   push:
