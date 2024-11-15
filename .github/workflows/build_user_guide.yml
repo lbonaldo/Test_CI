@@ -33,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: user_guide.pdf
-        path: docs/build/latex/user_guide.pdf
+        path: docs/build/latex
 
     - name: Trigger RTDs build
       uses: dfm/rtds-action@v1

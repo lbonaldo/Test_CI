@@ -17,7 +17,6 @@
 # -- Project information -----------------------------------------------------
 
 import os
-import subprocess
 import toml
 
 # read the pyproject.toml file
@@ -77,6 +76,6 @@ html_css_files = ['css/roles.css']
 
 # GitHub Actions artifact
 rtds_action_github_repo = "energyPATHWAYS"
-rtds_action_path = "build/latex/user_guide.pdf"
-rtds_action_artifact_prefix = "Upload User Guide PDF"
+rtds_action_path = "_static"
+rtds_action_artifact_prefix = "user_guide.pdf"
 rtds_action_github_token = os.environ.get("GITHUB_TOKEN")
