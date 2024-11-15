@@ -87,4 +87,4 @@ def generate_user_guide_pdf(app, exception):
             print(f"Warning: Unable to generate PDF. LaTeX may not be installed. Error: {e}")
 
 def setup(app):
-    app.connect("build-finished", generate_user_guide_pdf)
+    app.connect("config-inited", generate_user_guide_pdf)
