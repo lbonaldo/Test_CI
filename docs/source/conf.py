@@ -16,6 +16,8 @@
 
 # -- Project information -----------------------------------------------------
 
+import os
+import subprocess
 import toml
 
 # read the pyproject.toml file
@@ -49,6 +51,17 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+latex_documents = [
+    ('user_guide', 'user_guide.tex', 'EnergyPATHWAYS User Guide', 'C. Farid, H. Luo, A. Gunawan, A. Pascale, and E. Larson', 'manual'),
+]
+latex_elements = {
+    'passoptionstopackages': r'\PassOptionsToPackage{svgnames}{xcolor}',
+    'preamble': r'''
+\newcommand{\DUrolered}[1]{{\color{red} #1}}
+''',
+}
+
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -61,3 +74,12 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_css_files = ['css/roles.css']
+
+# Generate user guide PDF during the build (optional)
+def generate_user_guide_pdf(app, config):
+    # Only run for Read the Docs or CI builds
+    if os.environ.get("READTHEDOCS") == "True" or os.environ.get("CI") == "True":
+        subprocess.run(["make", "latexpdf"], check=True)
+
+def setup(app):
+    app.connect("config-inited", generate_user_guide_pdf)
