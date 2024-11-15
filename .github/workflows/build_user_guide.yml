@@ -1,4 +1,4 @@
-name: Build EP User Guide
+name: Build EP Documentation
 
 on:
   push:
@@ -24,12 +24,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended latexmk
 
-    - name: Build Sphinx Docs
+    - name: Build Sphinx User Guide PDF
       run: |
         cd docs
         make latexpdf
 
-    - name: Upload PDF
+    - name: Upload User Guide PDF
       uses: actions/upload-artifact@v4
       with:
         name: user_guide.pdf
