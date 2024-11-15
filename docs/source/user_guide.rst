@@ -28,7 +28,7 @@ Suggestion Citations
 --------------------
 This manual:
 
-* \C. Farid, H. Luo, A. Gunawan, A. Pascale, and E. Larson, "EnergyPATHWAYS Model User Guide, Revision 1," Andlinger Center for Energy and the Environment, Princeton University, August 1, 2024. (:download:`pdf <../EnergyPATHWAYS_User_Guide_August_2024.pdf>`)
+* \C. Farid, H. Luo, A. Gunawan, A. Pascale, and E. Larson, "EnergyPATHWAYS Model User Guide, Revision 1," Andlinger Center for Energy and the Environment, Princeton University, August 1, 2024. (:download:`User Guide <_static/user_guide.pdf>`)
 
 Test EP database for Australia:
 
@@ -42,4 +42,4 @@ August 1, 2024
 PDF Version
 -----------
 
-Link to PDF version of this document: :download:`pdf <../EnergyPATHWAYS_User_Guide_August_2024.pdf>`.
+Link to PDF version of this document: :download:`User Guide <_static/user_guide.pdf>`.
