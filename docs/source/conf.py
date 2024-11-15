@@ -79,7 +79,10 @@ html_css_files = ['css/roles.css']
 def generate_user_guide_pdf(app, config):
     # Only run for Read the Docs or CI builds
     if os.environ.get("READTHEDOCS") == "True" or os.environ.get("CI") == "True":
-        subprocess.run(["make", "latexpdf"], check=True)
+        try:
+            subprocess.run(["make", "latexpdf"], check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("Warning: Unable to generate PDF. LaTeX may not be installed.")
 
 def setup(app):
     app.connect("config-inited", generate_user_guide_pdf)
