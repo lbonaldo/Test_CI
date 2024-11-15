@@ -75,11 +75,11 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_css_files = ['css/roles.css']
 
-# Generate user guide PDF during the build (optional)
-def generate_user_guide_pdf(app, config):
-    # Only run for Read the Docs or CI builds
-    if os.environ.get("READTHEDOCS") == "True" or os.environ.get("CI") == "True":
-        subprocess.run(["make", "latexpdf"], check=True)
+# GitHub Actions artifact
+rtds_action_github_repo = "Test_CI"
 
-def setup(app):
-    app.connect("config-inited", generate_user_guide_pdf)
+rtds_action_path = "build/latex/user_guide.pdf"
+
+rtds_action_artifact_prefix = "Upload PDF"
+
+rtds_action_github_token = os.environ.get("GITHUB_TOKEN")

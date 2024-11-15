@@ -13,10 +13,16 @@ build:
     # nodejs: "20"
     # rust: "1.70"
     # golang: "1.20"
+  jobs:
+    post_build:
+      - make latexpdf
+
+# Enable LaTeX support
+build:
   apt_packages:
-    - texlive
-    - texlive-latex-extra
+    - texlive-latex-recommended
     - texlive-fonts-recommended
+    - texlive-latex-extra
     - latexmk
 
 # Build documentation in the "docs/" directory with Sphinx

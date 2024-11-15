@@ -28,10 +28,16 @@ jobs:
       run: |
         cd docs
         make latexpdf
-        mv build/latex/user_guide.pdf source/_static/
 
-    - name: Deploy Documentation
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Upload PDF
+      uses: actions/upload-artifact@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build/html
+        name: user_guide.pdf
+        path: docs/build/latex/user_guide.pdf
+
+    - name: Trigger RTDs build
+      uses: dfm/rtds-action@v1
+      with:
+        webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
+        webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
+        commit_ref: ${{ github.ref }}
