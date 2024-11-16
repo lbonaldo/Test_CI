@@ -78,5 +78,5 @@ html_css_files = ['css/roles.css']
 # GitHub Actions artifact
 rtds_action_github_repo = "lbonaldo/Test_CI"
 rtds_action_path = "_static"
-rtds_action_artifact_prefix = "user_guide.pdf"
+rtds_action_artifact_prefix = "user_guide-"
 rtds_action_github_token = os.environ.get("GITHUB_TOKEN")
