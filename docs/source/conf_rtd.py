@@ -40,6 +40,7 @@ release = pyproject["version"]
 extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx_rtd_theme',
+    'rtds_action',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -73,3 +74,9 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_css_files = ['css/roles.css']
+
+# GitHub Actions artifact
+rtds_action_github_repo = "lbonaldo/Test_CI"
+rtds_action_path = "_static"
+rtds_action_artifact_prefix = "user_guide.pdf"
+rtds_action_github_token = os.environ.get("GITHUB_TOKEN")
