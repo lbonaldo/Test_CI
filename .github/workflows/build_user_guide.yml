@@ -29,11 +29,23 @@ jobs:
         cd docs
         make latexpdf
 
-    - name: Upload User Guide PDF
-      uses: actions/upload-artifact@v4
-      with:
-        name: user_guide-${{ github.sha }}
-        path: docs/build/latex
+    # - name: Upload User Guide PDF
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: user_guide-${{ github.sha }}
+    #     path: docs/build/latex
+
+    - name: Move User Guide PDF to _static
+      run: |
+        mv docs/build/latex/user_guide.pdf docs/source/_static/user_guide.pdf
+
+    - name: Commit and Push User Guide PDF
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add docs/source/_static/user_guide.pdf
+        git commit -m "Update user_guide.pdf"
+        git push
 
     - name: Trigger RTDs build
       uses: dfm/rtds-action@v1
