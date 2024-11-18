@@ -15,4 +15,4 @@ and aid users in maximizing its use. The guide begins with installation
 and first run instructions, before offering an overview of the model 
 methodology and database setup. The latter part of this document includes 
 a description of all relevant database files. This guide is a work in progress, and
-:red:`red text corresponds to unknown/uncertain information`. Please email us at zerolab@princeton.edu if you would like to contribute to the guide.
+:red:`red text corresponds to unknown/uncertain information`. Please email us at (TODO: add email here) if you would like to contribute to the guide.

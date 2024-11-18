@@ -22,7 +22,7 @@ jobs:
       run: |
         pip install -r docs/requirements.txt
         
-    - name: Check for docs changes
+    - name: Check for changes in the User Guide
       id: docs-changes
       uses: dorny/paths-filter@v2
       with:
@@ -40,12 +40,12 @@ jobs:
         make latexpdf
         
         # Move PDF to _static
-        mv docs/build/latex/user_guide.pdf docs/source/_static/user_guide.pdf
+        mv build/latex/user_guide.pdf source/_static/user_guide.pdf
         
         # Commit and push changes
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add docs/source/_static/user_guide.pdf
+        git add source/_static/user_guide.pdf
         git commit -m "Update user_guide.pdf"
         git push
 
