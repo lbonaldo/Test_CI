@@ -21,19 +21,13 @@ jobs:
     - name: Install Dependencies
       run: |
         pip install -r docs/requirements.txt
-        sudo apt-get update
-        sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended latexmk
-
+        
     - name: Build Sphinx User Guide PDF
       run: |
+        sudo apt-get update
+        sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended latexmk
         cd docs
         make latexpdf
-
-    # - name: Upload User Guide PDF
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: user_guide-${{ github.sha }}
-    #     path: docs/build/latex
 
     - name: Move User Guide PDF to _static
       run: |
